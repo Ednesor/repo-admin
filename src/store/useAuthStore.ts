@@ -4,7 +4,7 @@ import type {
     UserRole,
     UserRegisterPayload,
 } from "@/types/api.types";
-import * as authApi from "@/api/authApi"
+import * as authApi from "@/shared/services/api/authApi"
 
 interface AuthState {
     user: UserPublic | null;

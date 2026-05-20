@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/useAuthStore';
 
 export function ProductsPage() {
-  const role = useAuthStore((state) => state.role);
+  const role = useAuthStore((state) => state.hasRole("admin") ? "Admin" : "User");
 
   return (
     <div className="p-6">
