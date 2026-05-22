@@ -11,6 +11,7 @@ interface AuthState {
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
+    role: string | null;
 
     hasRole: (...roles: UserRole[]) => boolean;
     login: (username: string, password: string) => Promise<void>;
@@ -26,6 +27,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     isAuthenticated: false,
     isLoading: true,
     error: null,
+    role: null,
 
     setError: (msg) => set({ error: msg }),
 

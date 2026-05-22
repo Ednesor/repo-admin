@@ -10,7 +10,7 @@ export function LoginPage() {
     const login = useAuthStore((state) => state.login);
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
 
@@ -21,9 +21,11 @@ export function LoginPage() {
 
         setIsLoading(true);
 
-        login(userName, password);
+        setTimeout(() => {
+          login(userName, password);
         setIsLoading(false);
-        navigate("/products");
+        navigate("/panel");
+        }, 1000);
     };
 
     return (
