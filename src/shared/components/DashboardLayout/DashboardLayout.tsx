@@ -8,6 +8,7 @@ import { BiCategoryAlt } from "react-icons/bi";
 import { LuUsers } from "react-icons/lu";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import NavBarAdmin from "./NavBarAdmin";
+import NavBarUp from "./NavBarUp";
 
 const navItems = [
     { path: "/panel", label: "Panel", icon: <MdOutlineDashboard /> },
@@ -27,6 +28,8 @@ const mockBranches: Branch[] = [
     { id: "3", name: "Sucursal Sur" },
 ];
 
+
+
 export function DashboardLayout() {
     const { user } = useAuthStore();
     console.log("Usuario actual:", user);
@@ -39,12 +42,10 @@ export function DashboardLayout() {
                 navItems={navItems}
             />
 
-            <div className="flex-1 flex flex-col">
-                <header className="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
-                    <div className="flex items-center justify-between"></div>
-                </header>
+            <div className="flex-1 flex flex-col bg-[#fafaf7]">
+                <NavBarUp user={user} />
 
-                <main className="flex-1 bg-gray-50 p-8 overflow-auto">
+                <main className="flex-1 p-8 overflow-auto">
                     <Outlet />
                 </main>
             </div>
