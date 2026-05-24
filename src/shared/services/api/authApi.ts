@@ -1,4 +1,5 @@
-import type { UserPublic, UserRegisterPayload } from "@/types/api.types";
+import type { UserRegisterPayload } from "@/types/api.types";
+import type { UserPublic } from "@/types/user.types";
 import apiClient from "./axiosInstance";
 
 const AUTH = "/auth";

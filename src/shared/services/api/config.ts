@@ -3,5 +3,5 @@ export function getApiBase(): string {
   if (!raw || typeof raw !== "string") {
     throw new Error("Falta VITE_API_BASE_URL en .env");
   }
-  return raw.replace(/\/$/, "");
+  return raw.replace(/\/$/, "").replace(/\/api$/, "");
 }
