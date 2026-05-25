@@ -4,22 +4,29 @@ import IngredientsFilters from "./IngredientsFilters";
 
 interface Props {
     selectedCategories: number[];
+    selectedIngredients: number[];
 
-    onChange: (ids: number[]) => void;
+    onCategoriesChange: (ids: number[]) => void;
+    onIngredientsChange: (ids: number[]) => void;
 }
 
 export default function ProductsFilters({
     selectedCategories,
-    onChange,
+    selectedIngredients,
+    onCategoriesChange,
+    onIngredientsChange,
 }: Props) {
     return (
         <div className="flex flex-col xl:flex-row gap-3 mb-6">
             <SearchFilter />
             <CategoriesFilters
                 selectedCategories={selectedCategories}
-                onChange={onChange}
+                onChange={onCategoriesChange}
             />
-            <IngredientsFilters />
+            <IngredientsFilters
+                selectedIngredients={selectedIngredients}
+                onChange={onIngredientsChange}
+            />
         </div>
     );
 }

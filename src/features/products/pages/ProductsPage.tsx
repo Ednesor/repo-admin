@@ -14,10 +14,16 @@ export function ProductsPage() {
         state.hasRole("admin") ? "Admin" : "User",
     );
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+    const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
 
     const handleCategoriesChange = (ids: number[]) => {
         setSelectedCategories(ids);
-        setPage(0); // reset pagination
+        setPage(0);
+    };
+
+    const handleIngredientsChange = (ids: number[]) => {
+        setSelectedIngredients(ids);
+        setPage(0);
     };
 
     const {
@@ -29,11 +35,11 @@ export function ProductsPage() {
         setColumnFilters,
     } = useProductsTable();
 
-    //Listar todo
     const { data, isLoading, isError, isFetching } = useProducts({
         page,
         pageSize: PAGE_SIZE,
         categoryIds: selectedCategories,
+        ingredientIds: selectedIngredients,
     });
 
     const {
@@ -110,11 +116,10 @@ export function ProductsPage() {
             <DisplayCardGroup items={cardsItems} />
             <ProductsFilters
                 selectedCategories={selectedCategories}
-                onChange={handleCategoriesChange}
+                selectedIngredients={selectedIngredients}
+                onCategoriesChange={handleCategoriesChange}
+                onIngredientsChange={handleIngredientsChange}
             />
-            {console.log(data)}
-            {console.log("selectedCategories变了:", selectedCategories)}
-{console.log("categoryIds en query:", selectedCategories)}
             <TableProducts
                 sorting={sorting}
                 columnFilters={columnFilters}
