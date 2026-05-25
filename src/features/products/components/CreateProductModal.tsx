@@ -74,6 +74,10 @@ export default function CreateProductModal({
         e.preventDefault();
         if (!form.nombre.trim()) return;
 
+        if (newImageUrl.trim()) {
+            addImageUrl();
+        }
+
         setIsSubmitting(true);
         try {
             await onSubmit(form);

@@ -6,7 +6,10 @@ export function useCreateProduct() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: CreateProductInput) => createProduct(data),
+        mutationFn: (data: CreateProductInput) => {
+            console.log("useCreateProduct mutationFn called with:", data);
+            return createProduct(data);
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
         },
