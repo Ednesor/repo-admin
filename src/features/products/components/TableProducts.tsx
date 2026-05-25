@@ -11,8 +11,44 @@ import {
     type SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { SlOptions } from "react-icons/sl";
+
+interface ImageCellProps {
+    src: string | undefined;
+    productName: string;
+}
+
+function isValidImageUrl(url: string | undefined): url is string {
+    if (!url) return false;
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+        return false;
+    }
+}
+
+function ImageCell({ src, productName }: ImageCellProps) {
+    const [imgError, setImgError] = useState(false);
+
+    if (isValidImageUrl(src) && !imgError) {
+        return (
+            <img
+                src={src}
+                alt={productName}
+                className="w-12 h-12 rounded-xl object-cover"
+                onError={() => setImgError(true)}
+            />
+        );
+    }
+
+    return (
+        <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 font-semibold flex items-center justify-center">
+            {productName.slice(0, 2).toUpperCase()}
+        </div>
+    );
+}
 
 interface Props {
     sorting: SortingState;
@@ -46,22 +82,11 @@ export default function TableProducts({
                 cell: (info) => {
                     const urls = info.getValue();
                     const src = urls?.[0];
+                    const name = info.row.original.nombre;
 
                     return (
                         <div className="w-14">
-                            {src ? (
-                                <img
-                                    src={src}
-                                    alt="producto"
-                                    className="w-12 h-12 rounded-xl object-cover"
-                                />
-                            ) : (
-                                <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 font-semibold flex items-center justify-center">
-                                    {info.row.original.nombre
-                                        .slice(0, 2)
-                                        .toUpperCase()}
-                                </div>
-                            )}
+                            <ImageCell src={src} productName={name} />
                         </div>
                     );
                 },
