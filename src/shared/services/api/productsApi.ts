@@ -1,5 +1,5 @@
 import type { GetProductsResponse } from "@/types/api.types";
-import type { ProductFilters } from "@/types/products.types";
+import type { ProductFilters, CreateProductInput } from "@/types/products.types";
 import apiClient from "./axiosInstance";
 
 const PRODUCTOS = "/productos/";
@@ -37,6 +37,11 @@ export async function getProducts(
     const url = queryString ? `${PRODUCTOS}?${queryString}` : PRODUCTOS;
 
     const response = await apiClient.get<GetProductsResponse>(url);
+    return response.data;
+}
+
+export async function createProduct(data: CreateProductInput) {
+    const response = await apiClient.post("/productos/", data);
     return response.data;
 }
 

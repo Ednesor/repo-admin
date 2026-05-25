@@ -6,6 +6,8 @@ import DisplayCardGroup from "@/shared/components/DisplayCardGroup/DisplayCardGr
 import { GoStack } from "react-icons/go";
 import ProductsFilters from "../components/ProductsFilters";
 import { useState } from "react";
+import CreateProductModal from "../components/CreateProductModal";
+import { useCreateProduct } from "../hooks/useCreateProduct";
 
 const PAGE_SIZE = 3;
 
@@ -15,6 +17,9 @@ export function ProductsPage() {
     );
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+    const createProductMutation = useCreateProduct();
 
     const handleCategoriesChange = (ids: number[]) => {
         setSelectedCategories(ids);
@@ -107,8 +112,11 @@ export function ProductsPage() {
                         {totalPages}
                     </p>
                 </div>
-                {role === "Admin" && (
-                    <button className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors">
+                {role !== "Admin" && (
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+                    >
                         + Nuevo producto
                     </button>
                 )}
@@ -130,6 +138,13 @@ export function ProductsPage() {
                 setPage={setPage}
                 page={page}
                 totalPages={totalPages}
+            />
+            <CreateProductModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSubmit={async (formData) => {
+                    await createProductMutation.mutateAsync(formData);
+                }}
             />
         </div>
     );

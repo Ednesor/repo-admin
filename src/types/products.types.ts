@@ -20,3 +20,14 @@ export interface ProductFilters {
     categoria_ids?: number[];
     ingrediente_ids?: number[];
 }
+
+export interface CreateProductInput {
+    nombre: string;
+    descripcion: string;
+    precio_base: number;
+    imagenes_url: string[];
+    stock_cantidad: number;
+    disponible: boolean;
+    categoria_ids: number[];
+    ingrediente_ids: number[];
+}
