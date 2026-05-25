@@ -139,12 +139,12 @@ export function ProductsPage() {
                 page={page}
                 totalPages={totalPages}
             />
-            <CreateProductModal
+<CreateProductModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={async (formData) => {
-                    await createProductMutation.mutateAsync(formData);
-                }}
+                onSubmit={(formData) =>
+                    createProductMutation.mutateAsync(formData)
+                }
             />
         </div>
     );

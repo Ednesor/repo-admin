@@ -31,6 +31,7 @@ export default function CreateProductModal({
     const [categoriesOpen, setCategoriesOpen] = useState(false);
     const [ingredientsOpen, setIngredientsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const { data: categoriesData } = useCategoriesTree();
     const { data: ingredientsData } = useIngredients();
@@ -72,6 +73,7 @@ export default function CreateProductModal({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
         if (!form.nombre.trim()) return;
 
         if (newImageUrl.trim()) {
@@ -83,6 +85,11 @@ export default function CreateProductModal({
             await onSubmit(form);
             resetForm();
             onClose();
+        } catch (err: unknown) {
+            const message =
+                (err as { response?: { data?: { mensaje?: string } } })?.response
+                    ?.data?.mensaje ?? "Error al crear el producto";
+            setError(message);
         } finally {
             setIsSubmitting(false);
         }
@@ -100,6 +107,7 @@ export default function CreateProductModal({
             ingrediente_ids: [],
         });
         setNewImageUrl("");
+        setError(null);
     };
 
     const handleClose = () => {
@@ -129,6 +137,12 @@ export default function CreateProductModal({
                         <FiX className="w-5 h-5 text-gray-500" />
                     </button>
                 </div>
+
+                {error && (
+                    <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                )}
 
                 <div className="overflow-y-auto flex-1 p-6">
                     <form id="create-product-form" onSubmit={handleSubmit}>
