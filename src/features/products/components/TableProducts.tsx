@@ -12,7 +12,7 @@ import {
     useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { SlOptions } from "react-icons/sl";
+import RowActions from "./RowActions";
 
 interface Props {
     sorting: SortingState;
@@ -24,6 +24,7 @@ interface Props {
     setPage: React.Dispatch<React.SetStateAction<number>>;
     page: number;
     totalPages: number;
+    onEditProduct?: (productId: number) => void;
 }
 
 export default function TableProducts({
@@ -36,6 +37,7 @@ export default function TableProducts({
     setPage,
     page,
     totalPages,
+    onEditProduct,
 }: Props) {
     const columnHelper = createColumnHelper<ProductsPublic>();
 
@@ -149,10 +151,11 @@ export default function TableProducts({
             columnHelper.display({
                 id: "actions",
                 header: "",
-                cell: () => (
-                    <button className="text-gray-500 hover:text-black transition-colors">
-                        <SlOptions size={18} />
-                    </button>
+                cell: (info) => (
+                    <RowActions
+                        productId={info.row.original.id}
+                        onEdit={onEditProduct}
+                    />
                 ),
             }),
         ],

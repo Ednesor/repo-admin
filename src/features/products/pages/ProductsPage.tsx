@@ -6,8 +6,9 @@ import DisplayCardGroup from "@/shared/components/DisplayCardGroup/DisplayCardGr
 import { GoStack } from "react-icons/go";
 import ProductsFilters from "../components/ProductsFilters";
 import { useState } from "react";
-import CreateProductModal from "../components/CreateProductModal";
+import ProductModal from "@/shared/components/ProductModal";
 import { useCreateProduct } from "../hooks/useCreateProduct";
+import { useUpdateProduct } from "../hooks/useUpdateProduct";
 
 const PAGE_SIZE = 3;
 
@@ -18,8 +19,11 @@ export function ProductsPage() {
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingProductId, setEditingProductId] = useState<number | null>(null);
 
     const createProductMutation = useCreateProduct();
+    const updateProductMutation = useUpdateProduct();
 
     const handleCategoriesChange = (ids: number[]) => {
         setSelectedCategories(ids);
@@ -29,6 +33,16 @@ export function ProductsPage() {
     const handleIngredientsChange = (ids: number[]) => {
         setSelectedIngredients(ids);
         setPage(0);
+    };
+
+    const handleEditProduct = (productId: number) => {
+        setEditingProductId(productId);
+        setIsEditModalOpen(true);
+    };
+
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditingProductId(null);
     };
 
     const {
@@ -138,13 +152,29 @@ export function ProductsPage() {
                 setPage={setPage}
                 page={page}
                 totalPages={totalPages}
+                onEditProduct={handleEditProduct}
             />
-<CreateProductModal
+            <ProductModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={(formData) =>
                     createProductMutation.mutateAsync(formData)
                 }
+                mode="create"
+            />
+            <ProductModal
+                isOpen={isEditModalOpen}
+                onClose={handleCloseEditModal}
+                onSubmit={async (formData) => {
+                    if (editingProductId !== null) {
+                        await updateProductMutation.mutateAsync({
+                            id: editingProductId,
+                            data: formData,
+                        });
+                    }
+                }}
+                mode="edit"
+                productId={editingProductId ?? undefined}
             />
         </div>
     );

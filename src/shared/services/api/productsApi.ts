@@ -1,5 +1,5 @@
 import type { GetProductsResponse } from "@/types/api.types";
-import type { ProductFilters, CreateProductInput } from "@/types/products.types";
+import type { ProductFilters, CreateProductInput, ProductsPublic } from "@/types/products.types";
 import apiClient from "./axiosInstance";
 
 const PRODUCTOS = "/productos/";
@@ -43,4 +43,22 @@ export async function getProducts(
 export async function createProduct(data: CreateProductInput) {
     const response = await apiClient.post("/productos/", data);
     return response.data;
+}
+
+export async function getProductById(id: number): Promise<ProductsPublic> {
+    const response = await apiClient.get<ProductsPublic>(`/productos/${id}/`);
+    console.log("getProductById response:", response.data);
+    return response.data;
+}
+
+export async function updateProduct(
+    id: number,
+    data: CreateProductInput,
+): Promise<ProductsPublic> {
+    const response = await apiClient.patch(`/productos/${id}/`, data);
+    return response.data;
+}
+
+export async function deleteProduct(id: number): Promise<void> {
+    await apiClient.delete(`/productos/${id}/`);
 }
