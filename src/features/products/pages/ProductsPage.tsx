@@ -6,24 +6,32 @@ import DisplayCardGroup from "@/shared/components/DisplayCardGroup/DisplayCardGr
 import { GoStack } from "react-icons/go";
 import ProductsFilters from "../components/ProductsFilters";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ProductModal from "@/shared/components/ProductModal";
+import DeleteProductModal from "@/shared/components/DeleteProductModal";
 import { useCreateProduct } from "../hooks/useCreateProduct";
 import { useUpdateProduct } from "../hooks/useUpdateProduct";
+import { useDeleteProduct } from "../hooks/useDeleteProduct";
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 10;
 
 export function ProductsPage() {
     const role = useAuthStore((state) =>
         state.hasRole("admin") ? "Admin" : "User",
     );
+    const navigate = useNavigate();
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingProductId, setEditingProductId] = useState<number | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
+    const [deletingProductName, setDeletingProductName] = useState<string>("");
 
     const createProductMutation = useCreateProduct();
     const updateProductMutation = useUpdateProduct();
+    const deleteProductMutation = useDeleteProduct();
 
     const handleCategoriesChange = (ids: number[]) => {
         setSelectedCategories(ids);
@@ -43,6 +51,22 @@ export function ProductsPage() {
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
         setEditingProductId(null);
+    };
+
+    const handleDeleteProduct = (productId: number, productName: string) => {
+        setDeletingProductId(productId);
+        setDeletingProductName(productName);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setDeletingProductId(null);
+        setDeletingProductName("");
+    };
+
+    const handleViewDetails = (productId: number) => {
+        navigate(`/productos/${productId}`);
     };
 
     const {
@@ -153,6 +177,8 @@ export function ProductsPage() {
                 page={page}
                 totalPages={totalPages}
                 onEditProduct={handleEditProduct}
+                onDeleteProduct={handleDeleteProduct}
+                onViewDetails={handleViewDetails}
             />
             <ProductModal
                 isOpen={isCreateModalOpen}
@@ -175,6 +201,17 @@ export function ProductsPage() {
                 }}
                 mode="edit"
                 productId={editingProductId ?? undefined}
+            />
+            <DeleteProductModal
+                isOpen={isDeleteModalOpen}
+                onClose={handleCloseDeleteModal}
+                onConfirm={async () => {
+                    if (deletingProductId !== null) {
+                        await deleteProductMutation.mutateAsync(deletingProductId);
+                    }
+                }}
+                productName={deletingProductName}
+                productId={deletingProductId ?? 0}
             />
         </div>
     );

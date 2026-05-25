@@ -25,6 +25,8 @@ interface Props {
     page: number;
     totalPages: number;
     onEditProduct?: (productId: number) => void;
+    onDeleteProduct?: (productId: number, productName: string) => void;
+    onViewDetails?: (productId: number) => void;
 }
 
 export default function TableProducts({
@@ -38,6 +40,8 @@ export default function TableProducts({
     page,
     totalPages,
     onEditProduct,
+    onDeleteProduct,
+    onViewDetails,
 }: Props) {
     const columnHelper = createColumnHelper<ProductsPublic>();
 
@@ -154,7 +158,10 @@ export default function TableProducts({
                 cell: (info) => (
                     <RowActions
                         productId={info.row.original.id}
+                        productName={info.row.original.nombre}
                         onEdit={onEditProduct}
+                        onDetails={onViewDetails}
+                        onDelete={onDeleteProduct}
                     />
                 ),
             }),

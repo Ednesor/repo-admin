@@ -4,13 +4,15 @@ import { SlOptions } from "react-icons/sl";
 
 interface RowActionsProps {
     productId: number;
+    productName?: string;
     onEdit?: (id: number) => void;
     onDetails?: (id: number) => void;
-    onDelete?: (id: number) => void;
+    onDelete?: (id: number, name: string) => void;
 }
 
 export default function RowActions({
     productId,
+    productName,
     onEdit,
     onDetails,
     onDelete,
@@ -65,7 +67,7 @@ export default function RowActions({
                     </button>
                     <button
                         onClick={() => {
-                            onDelete?.(productId);
+                            onDelete?.(productId, productName ?? "");
                             setOpen(false);
                         }}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
