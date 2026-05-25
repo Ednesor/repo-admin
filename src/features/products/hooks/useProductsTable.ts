@@ -11,10 +11,8 @@ export function useProductsTable() {
     return {
         page,
         setPage,
-
         sorting,
         setSorting,
-
         columnFilters,
         setColumnFilters,
     };

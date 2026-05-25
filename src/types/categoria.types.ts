@@ -1,5 +1,8 @@
 export interface CategoriaPublic {
-    id: number;
+    parent_id: number;
     nombre: string;
-    es_principal: boolean;
+    descripcion: string;
+    imagen_url: string;
+    id: number;
+    subcategorias: CategoriaPublic[]
 }

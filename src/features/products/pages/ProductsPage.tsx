@@ -4,6 +4,8 @@ import { useProductsTable } from "../hooks/useProductsTable";
 import { useProducts } from "../hooks/useProducts";
 import DisplayCardGroup from "@/shared/components/DisplayCardGroup/DisplayCardGroup";
 import { GoStack } from "react-icons/go";
+import ProductsFilters from "../components/ProductsFilters";
+import { useState } from "react";
 
 const PAGE_SIZE = 3;
 
@@ -11,6 +13,12 @@ export function ProductsPage() {
     const role = useAuthStore((state) =>
         state.hasRole("admin") ? "Admin" : "User",
     );
+    const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
+
+    const handleCategoriesChange = (ids: number[]) => {
+        setSelectedCategories(ids);
+        setPage(0); // reset pagination
+    };
 
     const {
         page,
@@ -25,6 +33,7 @@ export function ProductsPage() {
     const { data, isLoading, isError, isFetching } = useProducts({
         page,
         pageSize: PAGE_SIZE,
+        categoryIds: selectedCategories,
     });
 
     const {
@@ -51,27 +60,26 @@ export function ProductsPage() {
             Icon: GoStack,
             title: String(data?.total ?? 0),
             description: "Total productos",
-            iconColor: "bg-blue-200"
+            iconColor: "bg-blue-200",
         },
         {
             Icon: GoStack,
             title: String(dataAvailable?.total ?? 0),
             description: "Productos disponibles",
-            iconColor: "bg-green-200"
+            iconColor: "bg-green-200",
         },
         {
             Icon: GoStack,
             title: "1",
             description: "Sin stock",
-            iconColor: "bg-red-200"
+            iconColor: "bg-red-200",
         },
         {
             Icon: GoStack,
             title: String(dataUnavailable?.total ?? 0),
             description: "Deshabilitaods",
-            iconColor: "bg-gray-200"
+            iconColor: "bg-gray-200",
         },
-        
     ];
 
     if (isLoading || isLoadingAvailable || isLoadingUnavailable)
@@ -100,6 +108,13 @@ export function ProductsPage() {
                 )}
             </div>
             <DisplayCardGroup items={cardsItems} />
+            <ProductsFilters
+                selectedCategories={selectedCategories}
+                onChange={handleCategoriesChange}
+            />
+            {console.log(data)}
+            {console.log("selectedCategories变了:", selectedCategories)}
+{console.log("categoryIds en query:", selectedCategories)}
             <TableProducts
                 sorting={sorting}
                 columnFilters={columnFilters}

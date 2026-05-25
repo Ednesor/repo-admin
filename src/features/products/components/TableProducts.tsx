@@ -73,7 +73,7 @@ export default function TableProducts({
                     const product = info.row.original;
 
                     return (
-                        <div className="min-w-[260px]">
+                        <div className="min-w-65">
                             <p className="font-semibold text-gray-800">
                                 {product.nombre}
                             </p>
