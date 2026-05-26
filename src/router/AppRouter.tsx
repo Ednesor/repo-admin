@@ -1,9 +1,11 @@
 import { ProtectedRoute } from "@/features/auth/components/ProtectedRoute";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import CategoriesPage from "@/features/categories/pages/CategoriesPage";
+import CategoryDetailPage from "@/features/categories/pages/CategoryDetailPage";
 import ClientsPage from "@/features/clients/pages/ClientsPage";
 import HelpPages from "@/features/help/pages/HelpPages";
 import IngredientsPage from "@/features/ingredients/pages/IngredientsPage";
+import IngredientDetailPage from "@/features/ingredients/pages/IngredientDetailPage";
 import { ProductsPage } from "@/features/products/pages/ProductsPage";
 import { ProductDetailPage } from "@/features/products/pages/ProductDetailPage";
 import { DashboardLayout } from "@/shared/components/DashboardLayout/DashboardLayout";
@@ -22,7 +24,9 @@ export default function AppRouter() {
                         <Route path="/productos/:id" element={<ProductDetailPage />} />
                         <Route path="/pedidos" element={<ProductsPage />} />
                         <Route path="/ingredientes" element={<IngredientsPage />} />
+                        <Route path="/ingredientes/:id" element={<IngredientDetailPage />} />
                         <Route path="/categorias" element={<CategoriesPage />} />
+                        <Route path="/categorias/:id" element={<CategoryDetailPage />} />
                         <Route path="/clientes" element={<ClientsPage />} />
                         <Route path="/ayuda" element={<HelpPages />} />
                     </Route>
