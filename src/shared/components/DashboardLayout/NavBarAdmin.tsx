@@ -3,12 +3,14 @@ import SucursalSelect from "./SucursalSelect";
 import type { Branch } from "./types";
 import { NavLink } from "react-router-dom";
 import { BsLayoutSidebarInsetReverse } from "react-icons/bs";
-import type { UserPublic } from "@/types/api.types";
+import type { UserPublic } from "@/types/user.types";
 import { useState } from "react";
+import { ROLE_LABELS } from "@/types/user.types";
 
 interface Props {
     mockBranches: Branch[];
     user: UserPublic | null;
+    roles: { codigo: string; nombre: string }[];
     systemNavItems: { path: string; label: string; icon: React.ReactNode }[];
     navItems: { path: string; label: string; icon: React.ReactNode }[];
 }
@@ -16,16 +18,15 @@ interface Props {
 export default function NavBarAdmin({
     mockBranches,
     user,
+    roles,
     systemNavItems,
     navItems,
 }: Props) {
-  //TODO: Implementar funcionalidad de ocultar/mostrar menú lateral
-  // @ts-expect-error: Esto es solo para pruebas, se eliminará cuando se implemente la funcionalidad real
-  const [isMenuHidden, setIsMenuHidden] = useState(false);
+    const [isMenuHidden] = useState(false);
 
-  // const hideShowMenu = () => {
-  //   setIsMenuHidden(!isMenuHidden);
-  // }
+    const displayName = user ? `${user.nombre} ${user.apellido}` : "Usuario";
+    const displayRole = roles.length > 0 ? ROLE_LABELS[roles[0].codigo] : "Sin rol";
+    const initials = user ? `${user.nombre.charAt(0)}${user.apellido.charAt(0)}` : "U";
 
     return (
         <aside className={`bg-mauve-950 text-white flex flex-col ${isMenuHidden ? "w-20" : "w-64"}`}>
@@ -88,11 +89,11 @@ export default function NavBarAdmin({
             <div className="grid grid-cols-4 px-4 py-2">
                 <div className="flex items-center gap-3 py-2 col-span-3">
                     <div className="bg-blue-200 text-neutral-800 font-medium rounded-full w-10 h-10 flex items-center justify-center">
-                        {user ? user.username.charAt(0) : "U"}
+                        {initials}
                     </div>
                     <div>
-                        <p className="text-sm font-medium">{user ? user.username : "Usuario"}</p>
-                        <p className="text-xs text-neutral-400">{user ? user.role : "Rol no asignado"}</p>
+                        <p className="text-sm font-medium truncate max-w-[140px]">{displayName}</p>
+                        <p className="text-xs text-neutral-400">{displayRole}</p>
                     </div>
                 </div>
                 <button className="flex items-center justify-center">

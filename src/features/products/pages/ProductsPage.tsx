@@ -16,9 +16,7 @@ import { useDeleteProduct } from "../hooks/useDeleteProduct";
 const PAGE_SIZE = 10;
 
 export function ProductsPage() {
-    const role = useAuthStore((state) =>
-        state.hasRole("admin") ? "Admin" : "User",
-    );
+    const canCreate = useAuthStore((state) => state.canCreateProducts);
     const navigate = useNavigate();
     const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
     const [selectedIngredients, setSelectedIngredients] = useState<number[]>([]);
@@ -150,7 +148,7 @@ export function ProductsPage() {
                         {totalPages}
                     </p>
                 </div>
-                {role !== "Admin" && (
+                {canCreate() && (
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"

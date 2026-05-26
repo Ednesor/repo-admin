@@ -7,7 +7,7 @@ import type {
 } from "@/types/categoria.types";
 import apiClient from "./axiosInstance";
 
-const CATEGORIAS = "/categorias/";
+const CATEGORIAS = "/api/v1/categorias/";
 
 export async function getCategories(
     offset?: number,
@@ -31,7 +31,7 @@ export async function getCategories(
 
 export async function getCategoriesTree(): Promise<CategoryTreeResponse> {
     const response = await apiClient.get<CategoryTreeResponse>(
-        "/categorias/arbol",
+        `${CATEGORIAS}arbol`,
     );
     return response.data;
 }

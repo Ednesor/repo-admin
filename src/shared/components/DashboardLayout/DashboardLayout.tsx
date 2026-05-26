@@ -31,13 +31,13 @@ const mockBranches: Branch[] = [
 
 
 export function DashboardLayout() {
-    const { user } = useAuthStore();
-    console.log("Usuario actual:", user);
+    const { user, roles } = useAuthStore();
     return (
         <div className="min-h-screen flex">
             <NavBarAdmin
                 mockBranches={mockBranches}
                 user={user}
+                roles={roles}
                 systemNavItems={systemNavItems}
                 navItems={navItems}
             />

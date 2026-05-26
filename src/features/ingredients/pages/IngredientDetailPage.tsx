@@ -7,7 +7,7 @@ export default function IngredientDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const role = useAuthStore((state) =>
-        state.hasRole("admin") ? "Admin" : "User",
+        state.hasRole("ADMIN") ? "Admin" : "User",
     );
 
     const ingredientId = id ? parseInt(id, 10) : 0;

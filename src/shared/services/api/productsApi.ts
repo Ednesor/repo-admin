@@ -2,7 +2,7 @@ import type { GetProductsResponse } from "@/types/api.types";
 import type { ProductFilters, CreateProductInput, ProductsPublic } from "@/types/products.types";
 import apiClient from "./axiosInstance";
 
-const PRODUCTOS = "/productos/";
+const PRODUCTOS = "/api/v1/productos/";
 
 export async function getProducts(
     filters: ProductFilters = {},
@@ -41,12 +41,12 @@ export async function getProducts(
 }
 
 export async function createProduct(data: CreateProductInput) {
-    const response = await apiClient.post("/productos/", data);
+    const response = await apiClient.post(PRODUCTOS, data);
     return response.data;
 }
 
 export async function getProductById(id: number): Promise<ProductsPublic> {
-    const response = await apiClient.get<ProductsPublic>(`/productos/${id}/`);
+    const response = await apiClient.get<ProductsPublic>(`${PRODUCTOS}${id}`);
     console.log("getProductById response:", response.data);
     return response.data;
 }
@@ -55,7 +55,7 @@ export async function updateProduct(
     id: number,
     data: CreateProductInput,
 ): Promise<ProductsPublic> {
-    const response = await apiClient.patch(`/productos/${id}/`, data);
+    const response = await apiClient.patch(`${PRODUCTOS}${id}/`, data);
     return response.data;
 }
 

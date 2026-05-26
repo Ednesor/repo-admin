@@ -7,7 +7,7 @@ import type {
 } from "@/types/ingredients.types";
 import apiClient from "./axiosInstance";
 
-const INGREDIENTES = "/ingredientes/";
+const INGREDIENTES = "/api/v1/ingredientes/";
 
 export async function getIngredients(): Promise<IngredientsPublic[]> {
     const response = await apiClient.get<{ data: IngredientsPublic[] }>(

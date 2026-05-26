@@ -1,7 +1,11 @@
 import { useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { BsLayoutSidebarInsetReverse, BsSearch, BsBell, BsGear, BsBoxArrowRight, BsPerson } from "react-icons/bs";
-import type { UserPublic } from "@/types/api.types";
+import type { UserPublic } from "@/types/user.types";
+import { useLogout } from "@/features/auth/hooks/useAuth";
+import { useAuthStore } from "@/store/useAuthStore";
+import { ROLE_LABELS } from "@/types/user.types";
+import { useQueryClient } from "@tanstack/react-query";
 interface Props {
     user: UserPublic | null;
 }
@@ -10,6 +14,11 @@ export default function NavBarUp({ user }: Props) {
     const currentPage = location.pathname.slice(1);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const logoutMutation = useLogout();
+    const clearSession = useAuthStore((state) => state.clearSession);
+    const roles = useAuthStore((state) => state.roles);
+    const queryClient = useQueryClient();
+
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -19,6 +28,20 @@ export default function NavBarUp({ user }: Props) {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logoutMutation.mutateAsync();
+        } catch {
+            clearSession();
+            queryClient.clear();
+        }
+        setDropdownOpen(false);
+    };
+
+    const displayName = user ? `${user.nombre} ${user.apellido}` : "Usuario";
+    const displayRole = roles.length > 0 ? ROLE_LABELS[roles[0].codigo] : "Sin rol";
+    const initials = user ? `${user.nombre.charAt(0)}${user.apellido.charAt(0)}` : "U";
     return (
         <header className="shadow-sm border-b border-gray-200 px-8 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -55,11 +78,11 @@ export default function NavBarUp({ user }: Props) {
                         className="flex items-center gap-3 py-2 hover:bg-gray-50 rounded-lg px-2 transition-colors"
                     >
                         <div className="bg-blue-200 text-neutral-800 font-medium rounded-full w-10 h-10 flex items-center justify-center">
-                            {user ? user.username.charAt(0) : "U"}
+                            {initials}
                         </div>
                         <div className="text-left">
-                            <p className="text-sm font-medium">{user ? user.username : "Usuario"}</p>
-                            <p className="text-xs text-neutral-500">{user ? user.role : "Rol no asignado"}</p>
+                            <p className="text-sm font-medium">{displayName}</p>
+                            <p className="text-xs text-neutral-500">{displayRole}</p>
                         </div>
                     </button>
                     {dropdownOpen && (
@@ -73,7 +96,10 @@ export default function NavBarUp({ user }: Props) {
                                 Configuración
                             </button>
                             <div className="border-t border-gray-100 my-1" />
-                            <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            >
                                 <BsBoxArrowRight className="text-red-500" />
                                 Cerrar sesión
                             </button>
