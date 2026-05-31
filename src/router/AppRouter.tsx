@@ -10,6 +10,7 @@ import { ProductsPage } from "@/features/products/pages/ProductsPage";
 import { ProductDetailPage } from "@/features/products/pages/ProductDetailPage";
 import { DashboardLayout } from "@/shared/components/DashboardLayout/DashboardLayout";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { OrdersPage } from "@/features/orders/pages/OrdersPage";
 
 export default function AppRouter() {
     return (
@@ -25,7 +26,7 @@ export default function AppRouter() {
                     </Route>
 
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN", "PEDIDOS"]} />}>
-                        <Route path="/pedidos" element={<ProductsPage />} />
+                        <Route path="/pedidos" element={<OrdersPage />} />
                     </Route>
 
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
