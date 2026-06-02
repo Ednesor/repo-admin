@@ -4,6 +4,8 @@ import apiClient from "./axiosInstance";
 const AUTH = "/api/v1/auth";
 const USUARIOS = "/api/v1/usuarios";
 
+//TODO : Feature faltante - El backend tiene una serie de endpoints en `/admin/usuarios` para crear, listar, editar roles y eliminar usuarios. Actualmente el frontend no implementa un `usersApi.ts` para consumir estos endpoints, por lo que no hay forma de administrar usuarios desde la UI.
+
 export interface LoginCredentials {
     username: string;
     password: string;

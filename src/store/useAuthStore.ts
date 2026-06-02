@@ -51,6 +51,7 @@ function setStoredRoles(roles: RolPublic[]) {
 }
 
 function getDefaultRoleForUser(user: UserPublic | null): RolPublic | null {
+    //TODO : Deuda técnica - Seguridad: Nunca se debe inferir roles visuales basándose en un string como el email ("admin"). Si un usuario se registra con "admin_trucho@gmail.com", automáticamente ganará la interfaz de Administrador (aunque el backend luego le bloquee las peticiones por no tener el JWT correcto). El rol DEBE venir desde el backend.
     if (!user) return null;
     const email = user.email.toLowerCase();
     if (email.includes("admin")) {

@@ -29,5 +29,6 @@ export interface CreateProductInput {
     stock_cantidad: number;
     disponible: boolean;
     categoria_ids: number[];
+    //TODO : Deuda técnica - El backend no acepta `ingrediente_ids: number[]`. Espera una lista de objetos: `ingredientes: { ingrediente_id: number, es_removible: boolean }[]`. Al crear un producto, esto fallará.
     ingrediente_ids: number[];
 }
