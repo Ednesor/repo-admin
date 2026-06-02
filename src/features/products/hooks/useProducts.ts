@@ -1,5 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "@/shared/services/api/productsApi";
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { createProduct, updateProduct, deleteProduct } from "@/shared/services/api/productsApi";
+import type { CreateProductInput } from "@/types/products.types";
+
 
 interface Props {
     page: number;
@@ -16,7 +21,8 @@ export function useProducts({
     categoryIds,
     ingredientIds,
 }: Props) {
-    return useQuery({
+    const queryClient = useQueryClient();
+    const productsQuery = useQuery({
         queryKey: [
             "products",
             page,
@@ -37,4 +43,30 @@ export function useProducts({
         refetchOnWindowFocus: true,
         placeholderData: (previousData) => previousData,
     });
+
+    // create Product
+    const createProductMutation = useMutation({
+        mutationFn: (data: CreateProductInput) => createProduct(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["products"] });
+        },
+    });
+
+    // update Product
+    const updateProductMutation = useMutation({
+        mutationFn: ({ id, data }: { id: number, data: CreateProductInput }) => updateProduct(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["products"] });
+        },
+    });
+
+    // delete Product
+    const deleteProductMutation = useMutation({
+        mutationFn: (id: number) => deleteProduct(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["products"] });
+        },
+    });
+
+    return { productsQuery, createProductMutation, updateProductMutation, deleteProductMutation };
 }

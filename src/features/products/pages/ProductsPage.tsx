@@ -9,9 +9,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductModal from "@/shared/components/ProductModal";
 import DeleteProductModal from "@/shared/components/DeleteProductModal";
-import { useCreateProduct } from "../hooks/useCreateProduct";
-import { useUpdateProduct } from "../hooks/useUpdateProduct";
-import { useDeleteProduct } from "../hooks/useDeleteProduct";
+
 
 const PAGE_SIZE = 10;
 
@@ -26,10 +24,6 @@ export function ProductsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deletingProductId, setDeletingProductId] = useState<number | null>(null);
     const [deletingProductName, setDeletingProductName] = useState<string>("");
-
-    const createProductMutation = useCreateProduct();
-    const updateProductMutation = useUpdateProduct();
-    const deleteProductMutation = useDeleteProduct();
 
     const handleCategoriesChange = (ids: number[]) => {
         setSelectedCategories(ids);
@@ -76,31 +70,38 @@ export function ProductsPage() {
         setColumnFilters,
     } = useProductsTable();
 
-    const { data, isLoading, isError, isFetching } = useProducts({
+    const { productsQuery, createProductMutation, updateProductMutation, deleteProductMutation } = useProducts({
         page,
         pageSize: PAGE_SIZE,
         categoryIds: selectedCategories,
         ingredientIds: selectedIngredients,
+    });
+    const { data, isLoading, isError, isFetching } = productsQuery;
+
+    const { productsQuery: availableProductsQuery } = useProducts({
+    page,
+    pageSize: PAGE_SIZE,
+    avaliable: true,
     });
 
     const {
         data: dataAvailable,
         isLoading: isLoadingAvailable,
         isError: isErrorAvailable,
-    } = useProducts({
-        page,
-        pageSize: PAGE_SIZE,
-        avaliable: true,
-    });
-    const {
-        data: dataUnavailable,
-        isLoading: isLoadingUnavailable,
-        isError: isErrorUnavailable,
-    } = useProducts({
+    } = availableProductsQuery;
+
+
+    const { productsQuery: unavailableProductsQuery } = useProducts({
         page,
         pageSize: PAGE_SIZE,
         avaliable: false,
     });
+
+    const {
+        data: dataUnavailable,
+        isLoading: isLoadingUnavailable,
+        isError: isErrorUnavailable,
+    } = unavailableProductsQuery;
 
     const cardsItems = [
         {
