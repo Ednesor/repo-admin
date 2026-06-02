@@ -10,7 +10,7 @@ import apiClient from "./axiosInstance";
 const INGREDIENTES = "/api/v1/ingredientes/";
 
 export async function getIngredients(): Promise<IngredientsPublic[]> {
-    //TODO : BUG GRAVE - El backend tiene un `limit` por defecto de 20. Al no enviar paginación desde aquí, el frontend asume erróneamente que descargó todos los ingredientes, pero solo tiene los primeros 20. Esto rompe selects y filtros.
+    //TODO : BUG GRAVE - Esta función no envía parámetros de paginación. El backend tiene `limit=20` por defecto, por lo que solo se obtienen los primeros 20 ingredientes. Cualquier filtro o select que asuma tener TODOS los ingredientes está roto.
     const response = await apiClient.get<{ data: IngredientsPublic[] }>(
         INGREDIENTES,
     );

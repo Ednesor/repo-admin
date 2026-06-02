@@ -66,6 +66,7 @@ export function useProduct({ id, enabled = true }: UseProductOptions) {
     }
 
     // update Product
+    //TODO : Deuda técnica - `useUpdateProduct` usa `CreateProductInput` como tipo del payload de edición, en lugar de usar un tipo específico `UpdateProductInput` con todos los campos opcionales. Esto obliga a enviar TODOS los campos al editar, aunque el backend soporta PATCH parcial. Además, el tipo `CreateProductInput` tiene `ingrediente_ids: number[]` que es incompatible con el backend.
     export function useUpdateProduct() { 
         const queryClient = useQueryClient();
         return useMutation({

@@ -15,7 +15,7 @@ export async function getProducts(
     if (filters.limit !== undefined) {
         params.append("limit", String(filters.limit));
     }
-    //TODO : Deuda técnica - El frontend envía "include_only_active" pero el backend espera "disponible" (boolean) y opcionalmente "estado" (enum). Esto causa que el filtro falle silenciosamente en el backend.
+    //TODO : BUG GRAVE - El frontend envía `include_only_active` como string ("true"/"false") pero el backend espera `disponible` como boolean. Este parámetro se ignora completamente en el backend, causando que el filtro "solo disponibles" nunca funcione.
     if (filters.include_only_active !== undefined) {
         params.append(
             "include_only_active",
@@ -49,6 +49,7 @@ export async function createProduct(data: CreateProductInput) {
 
 export async function getProductById(id: number): Promise<ProductsPublic> {
     const response = await apiClient.get<ProductsPublic>(`${PRODUCTOS}${id}`);
+    //TODO : Deuda técnica - console.log en producción que expone datos de respuesta de la API. Debe eliminarse.
     console.log("getProductById response:", response.data);
     return response.data;
 }

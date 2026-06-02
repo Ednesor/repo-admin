@@ -51,7 +51,7 @@ function setStoredRoles(roles: RolPublic[]) {
 }
 
 function getDefaultRoleForUser(user: UserPublic | null): RolPublic | null {
-    //TODO : Deuda técnica - Seguridad: Nunca se debe inferir roles visuales basándose en un string como el email ("admin"). Si un usuario se registra con "admin_trucho@gmail.com", automáticamente ganará la interfaz de Administrador (aunque el backend luego le bloquee las peticiones por no tener el JWT correcto). El rol DEBE venir desde el backend.
+    //TODO : BUG GRAVE - Seguridad: Inferir roles del lado del cliente basándose en el email es EXTREMADAMENTE PELIGROSO. Cualquier usuario que se registre con "admin" en su email (ej: "admin_trucho@gmail.com") obtendrá interfaz de administrador. Aunque el backend rechace las peticiones, el usuario verá la UI completa. Los roles DEBEN venir del backend en el JWT y en el endpoint `/usuarios/me`. La raíz del problema es que `getCurrentUser()` retorna `UserPublic` en vez de `UserPublicAdminPanel` que incluye `roles`.
     if (!user) return null;
     const email = user.email.toLowerCase();
     if (email.includes("admin")) {
@@ -235,6 +235,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     // Verifica si el usuario tiene AL MENOS UNO de los roles especificados
     hasAnyRole: (roles) => {
         const { roles: userRoles } = get();
+        //TODO : Deuda técnica - console.log de información de roles del usuario en producción, debe eliminarse.
         console.log(userRoles, roles)
         const userRoleCodes = userRoles.map((r) => r.codigo);
         return roles.some((role) => userRoleCodes.includes(role));

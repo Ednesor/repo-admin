@@ -81,8 +81,8 @@ export function ProductsPage() {
     const updateProductMutation = useUpdateProduct();
     const deleteProductMutation = useDeleteProduct();
 
-    //TODO : Deuda técnica - El parámetro "avaliable" tiene un error de ortografía. En productsApi.ts se mapea a "include_only_active" pero el backend en realidad espera "disponible".
-    //TODO : Deuda técnica - Hacer 3 peticiones a la API (una normal, una con avaliable: true y otra con avaliable: false) solo para obtener los totales de las tarjetas es un problema grave de performance. Se debería implementar un endpoint /stats en el backend.
+    //TODO : Deuda técnica - Hacer 3 peticiones HTTP paralelas (`data`, `dataAvailable`, `dataUnavailable`) solo para obtener los totales de las tarjetas de estadísticas es extremadamente ineficiente. Cada petición dispara una query con JOINs en el backend. Debería existir un endpoint único `/productos/stats` que devuelva todos los contadores en una sola respuesta.
+    //TODO : Deuda técnica - El parámetro "avaliable" tiene un typo (debería ser "available"). Además, se mapea a `include_only_active` en `productsApi.ts`, pero el backend espera `disponible`.
     const {
         data: dataAvailable,
         isLoading: isLoadingAvailable,
@@ -118,6 +118,7 @@ export function ProductsPage() {
         },
         {
             Icon: GoStack,
+            //TODO : BUG GRAVE - El valor de "Sin stock" está hardcodeado a "1" en lugar de calcularse dinámicamente. Esto muestra información falsa al administrador.
             title: "1",
             description: "Sin stock",
             iconColor: "bg-red-200",
@@ -125,6 +126,7 @@ export function ProductsPage() {
         {
             Icon: GoStack,
             title: String(dataUnavailable?.total ?? 0),
+            //TODO : Deuda técnica - Typo en "Deshabilitaods" (debería ser "Deshabilitados").
             description: "Deshabilitaods",
             iconColor: "bg-gray-200",
         },

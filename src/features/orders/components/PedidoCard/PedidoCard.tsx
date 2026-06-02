@@ -14,6 +14,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
     const [motivo, setMotivo] = useState("");
 
     const handleAvanzar = () => {
+        //TODO : Deuda técnica - Las transiciones de estados están hardcodeadas en el frontend y duplican `TRANSICIONES_VALIDAS` del backend. Si el backend cambia sus reglas (ej: agrega nuevo estado "LISTO_PARA_RETIRAR"), el frontend no lo sabrá y las flechas de avanzar/retroceder quedarán desincronizadas. Idealmente el backend debería exponer un endpoint que devuelva las transiciones válidas para cada estado.
         let siguienteEstado: EstadoPedido = 'CONFIRMADO';
         if (pedido.estado_codigo === 'PENDIENTE') siguienteEstado = 'CONFIRMADO';
         if (pedido.estado_codigo === 'CONFIRMADO') siguienteEstado = 'EN_PREP';
@@ -34,6 +35,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
 
     const confirmCancelar = () => {
         if (motivo.trim().length === 0) {
+            //TODO : Deuda técnica - Usar `alert()` nativo para mostrar errores de validación es una mala práctica de UX. Debe usarse un componente de toast/notificación o un mensaje inline en el modal.
             alert("El motivo es obligatorio para cancelar.");
             return;
         }
