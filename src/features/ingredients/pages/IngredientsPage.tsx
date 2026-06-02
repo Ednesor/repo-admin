@@ -9,9 +9,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import IngredientModal from "@/shared/components/IngredientModal";
 import DeleteIngredientModal from "@/shared/components/DeleteIngredientModal";
-import { useCreateIngredient } from "../hooks/useCreateIngredient";
-import { useUpdateIngredient } from "../hooks/useUpdateIngredient";
-import { useDeleteIngredient } from "../hooks/useDeleteIngredient";
+import { useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from "../hooks/useIngredients";
 
 const PAGE_SIZE = 10;
 

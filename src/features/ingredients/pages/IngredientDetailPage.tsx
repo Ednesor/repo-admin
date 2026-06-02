@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2, FiCheck, FiAlertTriangle } from "react-icons/fi";
-import { useIngredient } from "../hooks/useIngredient";
+import { useIngredient } from "../hooks/useIngredients";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function IngredientDetailPage() {

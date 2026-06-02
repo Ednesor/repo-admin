@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiLoader } from "react-icons/fi";
-import { useCategory } from "@/features/categories/hooks/useCategory";
+import { useCategory } from "@/features/categories/hooks/useCategories";
 import { useCategoriesTree } from "@/features/categories/hooks/useCategories";
 import type { CreateCategoryInput, CategoriaPublic } from "@/types/categoria.types";
 

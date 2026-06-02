@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FiChevronDown } from "react-icons/fi";
 
-import { useCategoriesTree } from "../hooks/useCategoriesTree";
+import { useCategoriesTree } from "../../categories/hooks/useCategories";
 import type { CategoriaPublic } from "@/types/categoria.types";
 
 interface Props {

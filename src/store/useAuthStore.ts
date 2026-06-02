@@ -86,6 +86,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         });
     },
 
+    // Valida la sesión al cargar la página (ej: cuando apretás F5). 
+    // Intenta traer el usuario del back y restaurar sus roles visuales.
     checkAuth: async () => {
         set({ isLoadingInitial: true, error: null });
         try {
@@ -99,6 +101,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
                 }
             }
 
+            /* 
+            Obtiene la clave de cada rol y lo guardamos en sessionstorage
+            para no tener que hacer peticiones cada vez que cambiamos de pagina
+            */
             const roleCodes = storedRoles.map((r) => r.codigo);
             const hasAdminRole = roleCodes.some((code) =>
                 ["ADMIN", "STOCK", "PEDIDOS"].includes(code)
@@ -139,6 +145,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
             await authApi.login({ username, password });
             const user = await authApi.getCurrentUser();
             let roles: RolPublic[] = [];
+            // intenta ver si llega el rol de parte del back
             if ("roles" in user && Array.isArray((user as unknown as { roles: RolPublic[] }).roles)) {
                 roles.push(...((user as unknown as { roles: RolPublic[] }).roles));
             }
@@ -150,11 +157,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
                 }
             }
 
+            // obtiene los codigos de los roles
             const roleCodes = roles.map((r) => r.codigo);
             const hasAdminRole = roleCodes.some((code) =>
                 ["ADMIN", "STOCK", "PEDIDOS"].includes(code)
             );
 
+            // si no tiene rol de administrador, cerrar sesion
             if (!hasAdminRole) {
                 try { await authApi.logout(); } catch { /* ignore */ }
                 setStoredRoles([]);
@@ -168,6 +177,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
                 throw new Error("INSUFFICIENT_PERMISSIONS");
             }
 
+            /*
+            Guardamos los roles en el sessionstorage
+            para no tener que hacer peticiones cada vez que cambiamos de pagina
+            y actualiza el estado global de zustand para que sepa que estamos logueado 
+            y renderice las vistas
+            */
             setStoredRoles(roles);
             set({
                 user,
@@ -209,12 +224,14 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         });
     },
 
+    // Verifica si el usuario tiene TODOS los roles especificados
     hasRole: (...roles) => {
         const { roles: userRoles } = get();
         const userRoleCodes = userRoles.map((r) => r.codigo);
         return roles.every((role) => userRoleCodes.includes(role));
     },
 
+    // Verifica si el usuario tiene AL MENOS UNO de los roles especificados
     hasAnyRole: (roles) => {
         const { roles: userRoles } = get();
         console.log(userRoles, roles)
@@ -222,41 +239,48 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         return roles.some((role) => userRoleCodes.includes(role));
     },
 
+    // Devuelve un array con los códigos de rol en formato string puro
     getRoleCodes: () => {
         const { roles } = get();
         return roles.map((r) => r.codigo);
     },
 
+    // Lógica de negocio: Quién puede editar productos
     canEditProducts: () => {
         const { roles } = get();
         const roleCodes = roles.map((r) => r.codigo);
         return roleCodes.includes("ADMIN") || roleCodes.includes("STOCK");
     },
 
+    // Lógica de negocio: Quién puede borrar productos
     canDeleteProducts: () => {
         const { roles } = get();
         const roleCodes = roles.map((r) => r.codigo);
         return roleCodes.includes("ADMIN");
     },
 
+    // Lógica de negocio: Quién puede crear productos
     canCreateProducts: () => {
         const { roles } = get();
         const roleCodes = roles.map((r) => r.codigo);
         return roleCodes.includes("ADMIN");
     },
 
+    // Lógica de negocio: Quién puede modificar stock
     canEditStock: () => {
         const { roles } = get();
         const roleCodes = roles.map((r) => r.codigo);
         return roleCodes.includes("ADMIN") || roleCodes.includes("STOCK");
     },
 
+    // Lógica de negocio: Quién puede ver y cambiar estados de pedidos
     canManageOrders: () => {
         const { roles } = get();
         const roleCodes = roles.map((r) => r.codigo);
         return roleCodes.includes("ADMIN") || roleCodes.includes("PEDIDOS");
     },
 
+    // Puerta de entrada principal: Quién puede renderizar la vista del Panel
     canAccessAdmin: () => {
         const { roles } = get();
         const roleCodes = roles.map((r) => r.codigo);

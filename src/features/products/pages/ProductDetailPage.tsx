@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2, FiCheck, FiX } from "react-icons/fi";
-import { useProduct } from "../hooks/useProduct";
+import { useProduct } from "../hooks/useProducts";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export function ProductDetailPage() {

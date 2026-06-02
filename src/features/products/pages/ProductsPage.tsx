@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import TableProducts from "../components/TableProducts";
 import { useProductsTable } from "../hooks/useProductsTable";
-import { useProducts } from "../hooks/useProducts";
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "../hooks/useProducts";
 import DisplayCardGroup from "@/shared/components/DisplayCardGroup/DisplayCardGroup";
 import { GoStack } from "react-icons/go";
 import ProductsFilters from "../components/ProductsFilters";
@@ -70,38 +70,38 @@ export function ProductsPage() {
         setColumnFilters,
     } = useProductsTable();
 
-    const { productsQuery, createProductMutation, updateProductMutation, deleteProductMutation } = useProducts({
+    const { data, isLoading, isError, isFetching } = useProducts({
         page,
         pageSize: PAGE_SIZE,
         categoryIds: selectedCategories,
         ingredientIds: selectedIngredients,
     });
-    const { data, isLoading, isError, isFetching } = productsQuery;
 
-    const { productsQuery: availableProductsQuery } = useProducts({
-    page,
-    pageSize: PAGE_SIZE,
-    avaliable: true,
-    });
+    const createProductMutation = useCreateProduct();
+    const updateProductMutation = useUpdateProduct();
+    const deleteProductMutation = useDeleteProduct();
 
+    //TODO : Deuda técnica - El parámetro "avaliable" tiene un error de ortografía. En productsApi.ts se mapea a "include_only_active" pero el backend en realidad espera "disponible".
+    //TODO : Deuda técnica - Hacer 3 peticiones a la API (una normal, una con avaliable: true y otra con avaliable: false) solo para obtener los totales de las tarjetas es un problema grave de performance. Se debería implementar un endpoint /stats en el backend.
     const {
         data: dataAvailable,
         isLoading: isLoadingAvailable,
         isError: isErrorAvailable,
-    } = availableProductsQuery;
-
-
-    const { productsQuery: unavailableProductsQuery } = useProducts({
+    } = useProducts({
         page,
         pageSize: PAGE_SIZE,
-        avaliable: false,
+        avaliable: true,
     });
 
     const {
         data: dataUnavailable,
         isLoading: isLoadingUnavailable,
         isError: isErrorUnavailable,
-    } = unavailableProductsQuery;
+    } = useProducts({
+        page,
+        pageSize: PAGE_SIZE,
+        avaliable: false,
+    });
 
     const cardsItems = [
         {

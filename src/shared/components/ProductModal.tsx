@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiPlus, FiTrash2, FiLoader } from "react-icons/fi";
-import { useCategoriesTree } from "@/features/products/hooks/useCategoriesTree";
+import { useCategoriesTree } from "@/features/categories/hooks/useCategories";
 import { useIngredients } from "@/features/products/hooks/useIngredients";
-import { useProduct } from "@/features/products/hooks/useProduct";
+import { useProduct } from "@/features/products/hooks/useProducts";
 import type { CategoriaPublic } from "@/types/categoria.types";
 import type { IngredientsPublic } from "@/types/ingredients.types";
 import type { CreateProductInput } from "@/types/products.types";
