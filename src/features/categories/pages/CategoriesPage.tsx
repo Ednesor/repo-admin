@@ -9,9 +9,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CategoryModal from "@/shared/components/CategoryModal";
 import DeleteCategoryModal from "@/shared/components/DeleteCategoryModal";
-import { useCreateCategory } from "../hooks/useCreateCategory";
-import { useUpdateCategory } from "../hooks/useUpdateCategory";
-import { useDeleteCategory } from "../hooks/useDeleteCategory";
+import { useCreateCategory, useUpdateCategory, useDeleteCategory } from "../hooks/useCategories";
 
 const PAGE_SIZE = 10;
 

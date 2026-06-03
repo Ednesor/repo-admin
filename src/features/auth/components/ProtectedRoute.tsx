@@ -7,6 +7,10 @@ interface ProtectedRouteProps {
     redirectTo?: string;
 }
 
+// COMPONENTE 1: Guardián de Rutas Completas
+// Se usa en AppRouter.tsx. Envuelve las páginas enteras.
+// Si no estás logueado te patea al login. Si no tenés el rol, te patea al panel principal.
+// Si tenés acceso, renderiza <Outlet /> (es decir, deja pasar a los componentes hijos de la ruta).
 export function ProtectedRoute({
     allowedRoles,
     redirectTo = "/",
@@ -15,6 +19,7 @@ export function ProtectedRoute({
     const isLoadingInitial = useAuthStore((s) => s.isLoadingInitial);
     const userRoles = useAuthStore((s) => s.roles);
 
+    //TODO : BUG GRAVE - Los console.log() de allowedRoles y userRoles filtran información sensible de autorización a la consola del navegador. Cualquier extensión o script malicioso puede leer qué roles están configurados y cuáles tiene el usuario. Deben eliminarse en producción.
     console.log("[ProtectedRoute] allowedRoles:", allowedRoles);
     console.log("[ProtectedRoute] userRoles:", userRoles);
 
@@ -50,6 +55,10 @@ interface RequireRoleProps {
     fallback?: React.ReactNode;
 }
 
+// COMPONENTE 2: Ocultador de UI por Rol (Array de strings)
+// Se usa envolviendo pedazos de HTML (ej: un botón).
+// Le pasás un array de roles ej: roles={['ADMIN']}. Si el usuario lo tiene, dibuja el botón.
+// Si no lo tiene, dibuja el fallback (por defecto nada).
 export function RequireRole({ roles, children, fallback = null }: RequireRoleProps) {
     const userRoles = useAuthStore((s) => s.roles);
     const userRoleCodes = userRoles.map((r) => r.codigo);
@@ -68,6 +77,9 @@ interface RequirePermissionProps {
     fallback?: React.ReactNode;
 }
 
+// COMPONENTE 3: Ocultador de UI por Función de Permiso (El más limpio)
+// En vez de pasarle strings duros, le pasás las funciones de Zustand (ej: canDo={canEditProducts})
+// Es mucho mejor porque si cambia la lógica de quién puede editar, solo tocás Zustand y esto sigue andando.
 export function RequirePermission({ children, canDo, fallback = null }: RequirePermissionProps) {
     const hasPermission = canDo ? canDo() : false;
 

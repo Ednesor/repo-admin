@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiLoader } from "react-icons/fi";
-import { useIngredient } from "@/features/ingredients/hooks/useIngredient";
+import { useIngredient } from "@/features/ingredients/hooks/useIngredients";
 import type { CreateIngredientInput } from "@/types/ingredients.types";
 
 interface Props {

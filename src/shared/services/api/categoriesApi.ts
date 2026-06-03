@@ -13,6 +13,7 @@ export async function getCategories(
     offset?: number,
     limit?: number,
 ): Promise<GetCategoriesResponse> {
+    //TODO : Deuda técnica - El backend permite filtrar por "is_principal", "parent_id" y "estado". El frontend actualmente ignora estos filtros en el GET, limitando la capacidad de la tabla.
     const params = new URLSearchParams();
 
     if (offset !== undefined) {
@@ -39,6 +40,7 @@ export async function getCategoriesTree(): Promise<CategoryTreeResponse> {
 export async function getCategoryById(
     id: number,
 ): Promise<CategoriaDetail> {
+    //TODO : Deuda técnica - El backend acepta un query param "?incluir_eliminado=true" para traer categorías dadas de baja, el frontend no lo expone.
     const response = await apiClient.get<CategoriaDetail>(
         `${CATEGORIAS}${id}/`,
     );

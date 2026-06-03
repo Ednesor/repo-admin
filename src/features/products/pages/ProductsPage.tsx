@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import TableProducts from "../components/TableProducts";
 import { useProductsTable } from "../hooks/useProductsTable";
-import { useProducts } from "../hooks/useProducts";
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "../hooks/useProducts";
 import DisplayCardGroup from "@/shared/components/DisplayCardGroup/DisplayCardGroup";
 import { GoStack } from "react-icons/go";
 import ProductsFilters from "../components/ProductsFilters";
@@ -70,38 +70,38 @@ export function ProductsPage() {
         setColumnFilters,
     } = useProductsTable();
 
-    const { productsQuery, createProductMutation, updateProductMutation, deleteProductMutation } = useProducts({
+    const { data, isLoading, isError, isFetching } = useProducts({
         page,
         pageSize: PAGE_SIZE,
         categoryIds: selectedCategories,
         ingredientIds: selectedIngredients,
     });
-    const { data, isLoading, isError, isFetching } = productsQuery;
 
-    const { productsQuery: availableProductsQuery } = useProducts({
-    page,
-    pageSize: PAGE_SIZE,
-    avaliable: true,
-    });
+    const createProductMutation = useCreateProduct();
+    const updateProductMutation = useUpdateProduct();
+    const deleteProductMutation = useDeleteProduct();
 
+    //TODO : Deuda técnica - Hacer 3 peticiones HTTP paralelas (`data`, `dataAvailable`, `dataUnavailable`) solo para obtener los totales de las tarjetas de estadísticas es extremadamente ineficiente. Cada petición dispara una query con JOINs en el backend. Debería existir un endpoint único `/productos/stats` que devuelva todos los contadores en una sola respuesta.
+    //TODO : Deuda técnica - El parámetro "avaliable" tiene un typo (debería ser "available"). Además, se mapea a `include_only_active` en `productsApi.ts`, pero el backend espera `disponible`.
     const {
         data: dataAvailable,
         isLoading: isLoadingAvailable,
         isError: isErrorAvailable,
-    } = availableProductsQuery;
-
-
-    const { productsQuery: unavailableProductsQuery } = useProducts({
+    } = useProducts({
         page,
         pageSize: PAGE_SIZE,
-        avaliable: false,
+        avaliable: true,
     });
 
     const {
         data: dataUnavailable,
         isLoading: isLoadingUnavailable,
         isError: isErrorUnavailable,
-    } = unavailableProductsQuery;
+    } = useProducts({
+        page,
+        pageSize: PAGE_SIZE,
+        avaliable: false,
+    });
 
     const cardsItems = [
         {
@@ -118,6 +118,7 @@ export function ProductsPage() {
         },
         {
             Icon: GoStack,
+            //TODO : BUG GRAVE - El valor de "Sin stock" está hardcodeado a "1" en lugar de calcularse dinámicamente. Esto muestra información falsa al administrador.
             title: "1",
             description: "Sin stock",
             iconColor: "bg-red-200",
@@ -125,6 +126,7 @@ export function ProductsPage() {
         {
             Icon: GoStack,
             title: String(dataUnavailable?.total ?? 0),
+            //TODO : Deuda técnica - Typo en "Deshabilitaods" (debería ser "Deshabilitados").
             description: "Deshabilitaods",
             iconColor: "bg-gray-200",
         },

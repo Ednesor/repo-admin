@@ -1,8 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "@/shared/services/api/productsApi";
-import { useMutation } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
-import { createProduct, updateProduct, deleteProduct } from "@/shared/services/api/productsApi";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getProducts, getProductById, createProduct, updateProduct, deleteProduct } from "@/shared/services/api/productsApi";
 import type { CreateProductInput } from "@/types/products.types";
 
 
@@ -14,6 +11,11 @@ interface Props {
     ingredientIds?: number[];
 }
 
+export interface UseProductOptions {
+    id: number;
+    enabled?: boolean;
+}
+
 export function useProducts({
     page,
     pageSize,
@@ -21,8 +23,7 @@ export function useProducts({
     categoryIds,
     ingredientIds,
 }: Props) {
-    const queryClient = useQueryClient();
-    const productsQuery = useQuery({
+    return useQuery({
         queryKey: [
             "products",
             page,
@@ -43,30 +44,46 @@ export function useProducts({
         refetchOnWindowFocus: true,
         placeholderData: (previousData) => previousData,
     });
+}
+
+export function useProduct({ id, enabled = true }: UseProductOptions) {
+    return useQuery({
+        queryKey: ["product", id],
+        queryFn: () => getProductById(id),
+        enabled,
+    });
+}
 
     // create Product
-    const createProductMutation = useMutation({
-        mutationFn: (data: CreateProductInput) => createProduct(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["products"] });
-        },
-    });
+    export function useCreateProduct() {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: (data: CreateProductInput) => createProduct(data),
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["products"] });
+            },
+        });
+    }
 
     // update Product
-    const updateProductMutation = useMutation({
+    //TODO : Deuda técnica - `useUpdateProduct` usa `CreateProductInput` como tipo del payload de edición, en lugar de usar un tipo específico `UpdateProductInput` con todos los campos opcionales. Esto obliga a enviar TODOS los campos al editar, aunque el backend soporta PATCH parcial. Además, el tipo `CreateProductInput` tiene `ingrediente_ids: number[]` que es incompatible con el backend.
+    export function useUpdateProduct() { 
+        const queryClient = useQueryClient();
+        return useMutation({
         mutationFn: ({ id, data }: { id: number, data: CreateProductInput }) => updateProduct(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
         },
-    });
+    });}
 
     // delete Product
-    const deleteProductMutation = useMutation({
+    export function useDeleteProduct() { 
+        const queryClient = useQueryClient();
+        return useMutation({
         mutationFn: (id: number) => deleteProduct(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
         },
-    });
+    });}
 
-    return { productsQuery, createProductMutation, updateProductMutation, deleteProductMutation };
-}
+

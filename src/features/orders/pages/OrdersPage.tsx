@@ -1,4 +1,4 @@
-import { useOrders } from "../hooks/useOrders";
+import { useOrders, useCambiarEstadoPedido } from "../hooks/useOrders";
 import { PedidoCard } from "../components/PedidoCard/PedidoCard";
 import type { EstadoPedido } from "../types";
 
@@ -12,7 +12,12 @@ const COLUMNAS: { estado: EstadoPedido; titulo: string; colorDot: string }[] = [
 ];
 
 export function OrdersPage() {
-    const { pedidos, isLoading, isError, cambiarEstado, isChangingState } = useOrders();
+    const { data, isLoading, isError } = useOrders();
+    const pedidos = data?.data ?? [];
+    
+    const cambiarEstadoMutation = useCambiarEstadoPedido();
+    const cambiarEstado = cambiarEstadoMutation.mutate;
+    const isChangingState = cambiarEstadoMutation.isPending;
 
     if (isLoading) return <div className="p-6">Cargando tablero...</div>;
     if (isError) return <div className="p-6 text-red-500">Error al cargar los pedidos. Revisá la red.</div>;

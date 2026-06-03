@@ -4,6 +4,7 @@ export interface CategoriaPublic {
     descripcion: string;
     imagen_url: string;
     id: number;
+    //TODO : Deuda técnica - El backend solo devuelve `subcategorias` cuando se llama al endpoint `/arbol`. En un GET normal, este campo viene vacío o undefined. Debería ser opcional `subcategorias?: CategoriaPublic[]`.
     subcategorias: CategoriaPublic[];
     productos?: { id: number; nombre: string }[];
 }

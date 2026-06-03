@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2 } from "react-icons/fi";
-import { useCategory } from "../hooks/useCategory";
+import { useCategory } from "../hooks/useCategories";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function CategoryDetailPage() {
