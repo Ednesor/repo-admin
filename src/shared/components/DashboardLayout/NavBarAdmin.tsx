@@ -92,7 +92,7 @@ export default function NavBarAdmin({
                         {initials}
                     </div>
                     <div>
-                        <p className="text-sm font-medium truncate max-w-[140px]">{displayName}</p>
+                        <p className="text-sm font-medium truncate max-w-35">{displayName}</p>
                         <p className="text-xs text-neutral-400">{displayRole}</p>
                     </div>
                 </div>
