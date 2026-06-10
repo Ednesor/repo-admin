@@ -3,14 +3,14 @@ import SucursalSelect from "./SucursalSelect";
 import type { Branch } from "./types";
 import { NavLink } from "react-router-dom";
 import { BsLayoutSidebarInsetReverse } from "react-icons/bs";
-import type { UserPublic } from "@/types/user.types";
+import type { RolPublic, UserPublic } from "@/types/user.types";
 import { useState } from "react";
 import { ROLE_LABELS } from "@/types/user.types";
 
 interface Props {
     mockBranches: Branch[];
     user: UserPublic | null;
-    roles: { codigo: string; nombre: string }[];
+    roles: RolPublic[];
     systemNavItems: { path: string; label: string; icon: React.ReactNode }[];
     navItems: { path: string; label: string; icon: React.ReactNode }[];
 }
@@ -25,7 +25,7 @@ export default function NavBarAdmin({
     const [isMenuHidden] = useState(false);
 
     const displayName = user ? `${user.nombre} ${user.apellido}` : "Usuario";
-    const displayRole = roles.length > 0 ? ROLE_LABELS[roles[0].codigo] : "Sin rol";
+    const displayRole: string = roles.length > 0 ? ROLE_LABELS[roles[0].codigo] : "Sin rol";
     const initials = user ? `${user.nombre.charAt(0)}${user.apellido.charAt(0)}` : "U";
 
     return (

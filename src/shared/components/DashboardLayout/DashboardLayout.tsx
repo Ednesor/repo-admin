@@ -9,6 +9,7 @@ import { LuUsers } from "react-icons/lu";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import NavBarAdmin from "./NavBarAdmin";
 import NavBarUp from "./NavBarUp";
+import { RiAdminLine } from "react-icons/ri";
 
 const navItems = [
     { path: "/panel", label: "Panel", icon: <MdOutlineDashboard /> },
@@ -17,6 +18,7 @@ const navItems = [
     { path: "/ingredientes", label: "Ingredientes", icon: <TbBottle /> },
     { path: "/categorias", label: "Categorías", icon: <BiCategoryAlt /> },
     { path: "/clientes", label: "Clientes", icon: <LuUsers /> },
+    { path: "/usuarios", label: "Usuarios", icon: <RiAdminLine /> },
 ];
 const systemNavItems = [
     { path: "/ayuda", label: "Ayuda", icon: <FaRegQuestionCircle /> },
@@ -32,6 +34,7 @@ const mockBranches: Branch[] = [
 
 export function DashboardLayout() {
     const { user, roles } = useAuthStore();
+    console.log(roles)
     return (
         <div className="min-h-screen flex">
             <NavBarAdmin

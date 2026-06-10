@@ -11,6 +11,7 @@ import { ProductDetailPage } from "@/features/products/pages/ProductDetailPage";
 import { DashboardLayout } from "@/shared/components/DashboardLayout/DashboardLayout";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { OrdersPage } from "@/features/orders/pages/OrdersPage";
+import { UsersPage } from "@/features/users";
 
 export default function AppRouter() {
     return (
@@ -34,10 +35,12 @@ export default function AppRouter() {
                         <Route path="/ingredientes/:id" element={<IngredientDetailPage />} />
                         <Route path="/categorias" element={<CategoriesPage />} />
                         <Route path="/categorias/:id" element={<CategoryDetailPage />} />
+                        <Route path="/usuarios/*" element={<UsersPage />} />
                     </Route>
 
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
                         <Route path="/clientes" element={<ClientsPage />} />
+                        <Route path="/usuarios" element={<UsersPage />} />
                     </Route>
 
                     <Route path="/ayuda" element={<HelpPages />} />
