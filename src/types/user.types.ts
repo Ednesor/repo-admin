@@ -1,4 +1,4 @@
-export type RoleCode = "ADMIN" | "STOCK" | "PEDIDOS" | "CLIENT";
+export type RoleCode = "ADMIN" | "STOCK" | "PEDIDOS" | "CLIENT" | "COCINA";
 
 export interface RolPublic {
     codigo: RoleCode;
@@ -28,6 +28,7 @@ export const ROLE_LABELS: Record<RoleCode, string> = {
     STOCK: "Gestor de Stock",
     PEDIDOS: "Gestor de Pedidos",
     CLIENT: "Cliente",
+    COCINA: "Cocina",
 };
 
 export const ROLE_DESCRIPTIONS: Record<RoleCode, string> = {
