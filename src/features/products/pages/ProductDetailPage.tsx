@@ -7,7 +7,7 @@ export function ProductDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const role = useAuthStore((state) =>
-        state.hasRole("admin") ? "Admin" : "User",
+        state.hasRole("ADMIN") ? "Admin" : "User",
     );
 
     const productId = id ? parseInt(id, 10) : 0;
