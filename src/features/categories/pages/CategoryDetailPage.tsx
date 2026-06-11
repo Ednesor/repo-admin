@@ -7,7 +7,7 @@ export default function CategoryDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const role = useAuthStore((state) =>
-        state.hasRole("ADMIN") ? "Admin" : "User",
+        state.hasRole("admin") ? "Admin" : "User",
     );
 
     const categoryId = id ? parseInt(id, 10) : 0;
