@@ -1,6 +1,6 @@
-import { useOrders, useCambiarEstadoPedido } from "../hooks/useOrders";
+import { useOrders } from "../hooks/useOrders";
 import { PedidoCard } from "../components/PedidoCard/PedidoCard";
-import type { EstadoPedido } from "../types";
+import type { EstadoPedido, Pedido } from "../types";
 
 const COLUMNAS: { estado: EstadoPedido; titulo: string; colorDot: string }[] = [
     { estado: 'PENDIENTE', titulo: 'Pendientes', colorDot: 'bg-red-500' },
@@ -12,12 +12,8 @@ const COLUMNAS: { estado: EstadoPedido; titulo: string; colorDot: string }[] = [
 ];
 
 export function OrdersPage() {
-    const { data, isLoading, isError } = useOrders();
+    const { data, isLoading, isError, cambiarEstadoPedido, isChangingState } = useOrders();
     const pedidos = data?.data ?? [];
-    
-    const cambiarEstadoMutation = useCambiarEstadoPedido();
-    const cambiarEstado = cambiarEstadoMutation.mutate;
-    const isChangingState = cambiarEstadoMutation.isPending;
 
     if (isLoading) return <div className="p-6">Cargando tablero...</div>;
     if (isError) return <div className="p-6 text-red-500">Error al cargar los pedidos. Revisá la red.</div>;
@@ -46,11 +42,11 @@ export function OrdersPage() {
                             </div>
                             
                             <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 pb-2 custom-scrollbar">
-                                {pedidosColumna.map(p => (
+                                {pedidosColumna.map((p: Pedido) => (
                                     <PedidoCard 
                                         key={p.id} 
                                         pedido={p} 
-                                        onAvanzar={(id, estado, motivo) => cambiarEstado({ id, payload: { estado_hacia: estado, motivo }})} 
+                                        onAvanzar={(id, estado, motivo) => cambiarEstadoPedido({ id, payload: { estado_hacia: estado, motivo }})} 
                                         isLoading={isChangingState} 
                                     />
                                 ))}

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiPlus, FiTrash2, FiLoader } from "react-icons/fi";
-import { useCategoriesTree } from "@/features/categories/hooks/useCategories";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import { useIngredients } from "@/features/products/hooks/useIngredients";
-import { useProduct } from "@/features/products/hooks/useProducts";
+import { useProducts } from "@/features/products/hooks/useProducts";
 import type { CategoriaPublic } from "@/types/categoria.types";
 import type { IngredientsPublic } from "@/types/ingredients.types";
 import type { CreateProductInput } from "@/types/products.types";
@@ -23,9 +23,10 @@ const defaultForm: CreateProductInput = {
     stock_cantidad: 0,
     disponible: true,
     categoria_ids: [],
-    ingrediente_ids: [],
+    ingredientes: [],
 };
 
+// TODO: ROL STOCK necesita poder actualizar SOLAMENTE el stock. Actualmente se le deniega por permisos al intentar mandar todo el form, y además la UI no le desactiva los demás campos. Debería mostrarse en modo "solo lectura" para los demás campos y permitir editar únicamente stock_cantidad si el rol es STOCK.
 export default function ProductModal({
     isOpen,
     onClose,
@@ -42,10 +43,10 @@ export default function ProductModal({
     const [missingFields, setMissingFields] = useState<string[]>([]);
     const lastLoadedProductId = useRef<number | null>(null);
 
-    const { data: categoriesData } = useCategoriesTree();
+    const { treeData: categoriesData } = useCategories();
     const { data: ingredientsData } = useIngredients();
 
-    const { data: productData, isLoading: isLoadingProduct } = useProduct({
+    const { singleData: productData, isLoading: isLoadingProduct } = useProducts({
         id: productId ?? 0,
         enabled: isOpen && mode === "edit" && productId !== undefined,
     });
@@ -63,43 +64,47 @@ export default function ProductModal({
                 stock_cantidad: productData.stock_cantidad,
                 disponible: productData.disponible,
                 categoria_ids: productData.categorias?.map((c) => c.id) ?? [],
-                ingrediente_ids: productData.ingredientes?.map((i) => i.id) ?? [],
+                ingredientes: productData.ingredientes?.map((i) => ({ ingrediente_id: i.id, es_removible: true })) ?? [],
             });
         }
     }, [mode, productData]);
 
     const toggleCategory = (id: number) => {
-        setForm((prev) => ({
+        setForm((prev: CreateProductInput) => ({
             ...prev,
             categoria_ids: prev.categoria_ids.includes(id)
-                ? prev.categoria_ids.filter((cid) => cid !== id)
+                ? prev.categoria_ids.filter((cid: number) => cid !== id)
                 : [...prev.categoria_ids, id],
         }));
     };
 
     const toggleIngredient = (id: number) => {
-        setForm((prev) => ({
-            ...prev,
-            ingrediente_ids: prev.ingrediente_ids.includes(id)
-                ? prev.ingrediente_ids.filter((iid) => iid !== id)
-                : [...prev.ingrediente_ids, id],
-        }));
+        setForm((prev: CreateProductInput) => {
+            const currentIngredientes = prev.ingredientes ?? [];
+            const exists = currentIngredientes.some((i) => i.ingrediente_id === id);
+            return {
+                ...prev,
+                ingredientes: exists
+                    ? currentIngredientes.filter((i) => i.ingrediente_id !== id)
+                    : [...currentIngredientes, { ingrediente_id: id, es_removible: true }],
+            };
+        });
     };
 
     const addImageUrl = () => {
         if (newImageUrl.trim()) {
-            setForm((prev) => ({
+            setForm((prev: CreateProductInput) => ({
                 ...prev,
-                imagenes_url: [...prev.imagenes_url, newImageUrl.trim()],
+                imagenes_url: [...(prev.imagenes_url ?? []), newImageUrl.trim()],
             }));
             setNewImageUrl("");
         }
     };
 
     const removeImageUrl = (index: number) => {
-        setForm((prev) => ({
+        setForm((prev: CreateProductInput) => ({
             ...prev,
-            imagenes_url: prev.imagenes_url.filter((_, i) => i !== index),
+            imagenes_url: (prev.imagenes_url ?? []).filter((_, i: number) => i !== index),
         }));
     };
 
@@ -111,9 +116,9 @@ export default function ProductModal({
         const missing: string[] = [];
         if (!form.nombre.trim()) missing.push("Nombre");
         if (form.precio_base <= 0) missing.push("Precio base");
-        if (form.stock_cantidad < 0) missing.push("Stock");
+        if ((form.stock_cantidad ?? 0) < 0) missing.push("Stock");
         if (form.categoria_ids.length === 0) missing.push("Categorías");
-        if (form.ingrediente_ids.length === 0) missing.push("Ingredientes");
+        if (!form.ingredientes || form.ingredientes.length === 0) missing.push("Ingredientes");
 
         if (missing.length > 0) {
             setMissingFields(missing);
@@ -405,7 +410,7 @@ export default function ProductModal({
                                                                 <div className="ml-5 flex flex-col gap-1">
                                                                     {category.subcategorias.map(
                                                                         (
-                                                                            sub,
+                                                                            sub: CategoriaPublic,
                                                                         ) => (
                                                                             <button
                                                                                 type="button"
@@ -469,8 +474,8 @@ export default function ProductModal({
                                             className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700 hover:border-gray-300 transition-colors"
                                         >
                                             <span>
-                                                {form.ingrediente_ids.length > 0
-                                                    ? `${form.ingrediente_ids.length} ingredientes`
+                                                {(form.ingredientes ?? []).length > 0
+                                                    ? `${(form.ingredientes ?? []).length} ingredientes`
                                                     : "Seleccionar ingredientes"}
                                             </span>
                                             <svg
@@ -499,7 +504,7 @@ export default function ProductModal({
                                                     onClick={() =>
                                                         setForm((prev) => ({
                                                             ...prev,
-                                                            ingrediente_ids: [],
+                                                            ingredientes: [],
                                                         }))
                                                     }
                                                     className="w-full text-left px-3 py-2 rounded-lg text-sm text-amber-700 bg-amber-50 hover:bg-amber-100 mb-2"
@@ -518,25 +523,19 @@ export default function ProductModal({
                                                                 )
                                                             }
                                                             className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                                                                form.ingrediente_ids.includes(
-                                                                    ingredient.id,
-                                                                )
+                                                                (form.ingredientes ?? []).some(i => i.ingrediente_id === ingredient.id)
                                                                     ? "bg-amber-100 text-amber-700"
                                                                     : "hover:bg-gray-100 text-gray-700"
                                                             }`}
                                                         >
                                                             <div
                                                                 className={`w-4 h-4 rounded border flex items-center justify-center ${
-                                                                    form.ingrediente_ids.includes(
-                                                                        ingredient.id,
-                                                                    )
+                                                                    (form.ingredientes ?? []).some(i => i.ingrediente_id === ingredient.id)
                                                                         ? "bg-amber-500 border-amber-500"
                                                                         : "border-gray-300"
                                                                 }`}
                                                             >
-                                                                {form.ingrediente_ids.includes(
-                                                                    ingredient.id,
-                                                                ) && (
+                                                                {(form.ingredientes ?? []).some(i => i.ingrediente_id === ingredient.id) && (
                                                                     <div className="w-2 h-2 bg-white rounded-sm" />
                                                                 )}
                                                             </div>
@@ -587,10 +586,10 @@ export default function ProductModal({
                                         </button>
                                     </div>
 
-                                    {form.imagenes_url.length > 0 && (
+                                    {(form.imagenes_url ?? []).length > 0 && (
                                         <div className="space-y-2">
-                                            {form.imagenes_url.map(
-                                                (url, index) => (
+                                            {(form.imagenes_url ?? []).map(
+                                                (url: string, index: number) => (
                                                     <div
                                                         key={index}
                                                         className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2"

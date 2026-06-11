@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import TableProducts from "../components/TableProducts";
 import { useProductsTable } from "../hooks/useProductsTable";
-import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "../hooks/useProducts";
+import { useProducts } from "../hooks/useProducts";
 import DisplayCardGroup from "@/shared/components/DisplayCardGroup/DisplayCardGroup";
 import { GoStack } from "react-icons/go";
 import ProductsFilters from "../components/ProductsFilters";
@@ -9,7 +9,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProductModal from "@/shared/components/ProductModal";
 import DeleteProductModal from "@/shared/components/DeleteProductModal";
-
 
 const PAGE_SIZE = 10;
 
@@ -70,16 +69,12 @@ export function ProductsPage() {
         setColumnFilters,
     } = useProductsTable();
 
-    const { data, isLoading, isError, isFetching } = useProducts({
+    const { data, isLoading, isError, isFetching, create, update, remove } = useProducts({
         page,
         pageSize: PAGE_SIZE,
         categoryIds: selectedCategories,
         ingredientIds: selectedIngredients,
     });
-
-    const createProductMutation = useCreateProduct();
-    const updateProductMutation = useUpdateProduct();
-    const deleteProductMutation = useDeleteProduct();
 
     //TODO : Deuda técnica - Hacer 3 peticiones HTTP paralelas (`data`, `dataAvailable`, `dataUnavailable`) solo para obtener los totales de las tarjetas de estadísticas es extremadamente ineficiente. Cada petición dispara una query con JOINs en el backend. Debería existir un endpoint único `/productos/stats` que devuelva todos los contadores en una sola respuesta.
     //TODO : Deuda técnica - El parámetro "avaliable" tiene un typo (debería ser "available"). Además, se mapea a `include_only_active` en `productsApi.ts`, pero el backend espera `disponible`.
@@ -184,9 +179,7 @@ export function ProductsPage() {
             <ProductModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={(formData) =>
-                    createProductMutation.mutateAsync(formData)
-                }
+                onSubmit={(formData) => create(formData)}
                 mode="create"
             />
             <ProductModal
@@ -194,7 +187,7 @@ export function ProductsPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingProductId !== null) {
-                        await updateProductMutation.mutateAsync({
+                        await update({
                             id: editingProductId,
                             data: formData,
                         });
@@ -208,7 +201,7 @@ export function ProductsPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingProductId !== null) {
-                        await deleteProductMutation.mutateAsync(deletingProductId);
+                        await remove(deletingProductId);
                     }
                 }}
                 productName={deletingProductName}

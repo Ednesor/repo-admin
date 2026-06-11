@@ -28,6 +28,8 @@ interface Props {
     onViewDetails?: (categoryId: number) => void;
 }
 
+const columnHelper = createColumnHelper<CategoriaPublic>();
+
 export default function TableCategories({
     sorting,
     columnFilters,
@@ -42,8 +44,6 @@ export default function TableCategories({
     onDeleteCategory,
     onViewDetails,
 }: Props) {
-    const columnHelper = createColumnHelper<CategoriaPublic>();
-
     const columns = useMemo(
         () => [
             columnHelper.accessor("imagen_url", {
@@ -139,7 +139,7 @@ export default function TableCategories({
                 ),
             }),
         ],
-        [],
+        [onEditCategory, onViewDetails, onDeleteCategory],
     );
 
     const table = useReactTable({

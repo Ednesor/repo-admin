@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
     },
 });
 
-function AuthInitializer({ children }: { children: React.ReactNode }) {
+export function AuthInitializer({ children }: { children: React.ReactNode }) {
     const initialized = useRef(false);
 
     useEffect(() => {

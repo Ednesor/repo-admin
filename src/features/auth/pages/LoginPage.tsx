@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLogin } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth";
 import { isAxiosError } from "axios";
 
 export function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const loginMutation = useLogin();
+    const { login, isLoggingIn, loginError } = useAuth({ enabled: false });
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -17,7 +17,7 @@ export function LoginPage() {
         }
 
         try {
-            await loginMutation.mutateAsync({ username, password });
+            await login({ username, password });
             navigate("/panel");
         } catch {
             // Error handled by mutation
@@ -81,7 +81,7 @@ export function LoginPage() {
                                     onChange={(e) => setUsername(e.target.value)}
                                     placeholder="Ingresá tu usuario"
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-gray-800 placeholder-gray-400"
-                                    disabled={loginMutation.isPending}
+                                    disabled={isLoggingIn}
                                     autoComplete="username"
                                 />
                             </div>
@@ -100,23 +100,23 @@ export function LoginPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all text-gray-800 placeholder-gray-400"
-                                    disabled={loginMutation.isPending}
+                                    disabled={isLoggingIn}
                                     autoComplete="current-password"
                                 />
                             </div>
 
-                            {loginMutation.error && (
+                            {loginError && (
                                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                                    {getErrorMessage(loginMutation.error)}
+                                    {getErrorMessage(loginError)}
                                 </div>
                             )}
 
                             <button
                                 type="submit"
-                                disabled={loginMutation.isPending || !username.trim() || !password.trim()}
+                                disabled={isLoggingIn || !username.trim() || !password.trim()}
                                 className="w-full bg-amber-600 text-white py-3 rounded-xl font-semibold hover:bg-amber-700 disabled:bg-amber-300 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                             >
-                                {loginMutation.isPending ? (
+                                {isLoggingIn ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                         <span>Ingresando...</span>

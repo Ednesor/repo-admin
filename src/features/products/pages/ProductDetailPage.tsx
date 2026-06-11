@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2, FiCheck, FiX } from "react-icons/fi";
-import { useProduct } from "../hooks/useProducts";
+import { useProducts } from "../hooks/useProducts";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export function ProductDetailPage() {
@@ -11,7 +11,7 @@ export function ProductDetailPage() {
     );
 
     const productId = id ? parseInt(id, 10) : 0;
-    const { data: product, isLoading, isError } = useProduct({
+    const { singleData: product, isLoading, isError } = useProducts({
         id: productId,
         enabled: !isNaN(productId),
     });
@@ -75,7 +75,7 @@ export function ProductDetailPage() {
                 <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
                     {product.imagenes_url && product.imagenes_url.length > 0 ? (
                         <div className="grid grid-cols-2 gap-1">
-                            {product.imagenes_url.map((url, index) => (
+                            {product.imagenes_url.map((url: string, index: number) => (
                                 <div
                                     key={index}
                                     className={`${
@@ -158,7 +158,7 @@ export function ProductDetailPage() {
                                 Categorías
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {product.categorias.map((cat) => (
+                                {product.categorias.map((cat: { id: number; nombre: string }) => (
                                     <span
                                         key={cat.id}
                                         className="bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full text-sm font-medium"
@@ -176,7 +176,7 @@ export function ProductDetailPage() {
                                 Ingredientes
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {product.ingredientes.map((ing) => (
+                                {product.ingredientes.map((ing: { id: number; nombre: string; es_alergeno: boolean }) => (
                                     <span
                                         key={ing.id}
                                         className={`px-3 py-1.5 rounded-full text-sm font-medium ${

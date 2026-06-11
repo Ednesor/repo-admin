@@ -1,5 +1,5 @@
 import type { GetProductsResponse } from "@/types/api.types";
-import type { ProductFilters, CreateProductInput, ProductsPublic } from "@/types/products.types";
+import type { ProductFilters, CreateProductInput, ProductsPublic, UpdateProductInput } from "@/types/products.types";
 import apiClient from "./axiosInstance";
 
 const PRODUCTOS = "/api/v1/productos/";
@@ -56,7 +56,7 @@ export async function getProductById(id: number): Promise<ProductsPublic> {
 
 export async function updateProduct(
     id: number,
-    data: CreateProductInput,
+    data: UpdateProductInput,
 ): Promise<ProductsPublic> {
     const response = await apiClient.patch(`${PRODUCTOS}${id}/`, data);
     return response.data;

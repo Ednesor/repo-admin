@@ -12,6 +12,8 @@ import NavBarUp from "./NavBarUp";
 import { RiAdminLine } from "react-icons/ri";
 
 const navItems = [
+    // TODO: Filtrar estos items del sidebar según el rol (COCINA, PEDIDOS, STOCK, etc.).
+    // Actualmente ROL COCINA no puede entrar a operaciones, y ROL STOCK/PEDIDOS ven cosas de más.
     { path: "/panel", label: "Panel", icon: <MdOutlineDashboard /> },
     { path: "/pedidos", label: "Pedidos", icon: <MdOutlineListAlt /> },
     { path: "/productos", label: "Productos", icon: <ImStack /> },

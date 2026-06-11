@@ -10,6 +10,7 @@ export default function ClientsPage() {
         {roles.some(r => r.codigo === 'ADMIN') && (
           <p className="mt-2 text-blue-600">Acceso Administrador</p>
         )}
+        {/* TODO: implementar vista de clientes (lista, edición, etc.) según requerimientos */}
       </div>
     );
 }

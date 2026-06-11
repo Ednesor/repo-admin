@@ -28,6 +28,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
         let anteriorEstado: EstadoPedido = 'PENDIENTE';
         if (pedido.estado_codigo === 'CONFIRMADO') anteriorEstado = 'PENDIENTE';
         if (pedido.estado_codigo === 'EN_PREP') anteriorEstado = 'CONFIRMADO';
+        // TODO: según reglas de negocio, un pedido EN_CAMINO no debería poder retroceder a EN_PREP.
         if (pedido.estado_codigo === 'EN_CAMINO') anteriorEstado = 'EN_PREP';
 
         onAvanzar(pedido.id, anteriorEstado);
@@ -36,6 +37,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
     const confirmCancelar = () => {
         if (motivo.trim().length === 0) {
             //TODO : Deuda técnica - Usar `alert()` nativo para mostrar errores de validación es una mala práctica de UX. Debe usarse un componente de toast/notificación o un mensaje inline en el modal.
+            // TODO: Agregar toast ("El motivo es obligatorio para cancelar.") reemplazando este alert.
             alert("El motivo es obligatorio para cancelar.");
             return;
         }

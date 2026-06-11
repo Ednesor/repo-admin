@@ -3,88 +3,79 @@ import { getCategories, getCategoriesTree, getCategoryById, createCategory, upda
 import type { CreateCategoryInput, UpdateCategoryInput } from "@/types/categoria.types";
 
 interface Props {
-    page: number;
-    pageSize: number;
+    id?: number;
+    page?: number;
+    pageSize?: number;
+    enabled?: boolean;   // Opcional, false para apagar los GETs
 }
 
-export interface UseCategoryOptions {
-    id: number;
-    enabled?: boolean;
-}
-
-export function useCategories({ page, pageSize }: Props) {
-    return useQuery({
-        queryKey: ["categories", page, pageSize],
-        queryFn: () => getCategories(page * pageSize, pageSize),
-        staleTime: 0,
-        refetchOnWindowFocus: true,
-        placeholderData: (previousData) => previousData,
-    });
-}
-
-export function useCategoriesTree() {
-    return useQuery({
-        queryKey: ["categories-tree"],
-        queryFn: getCategoriesTree,
-        staleTime: 0,
-        refetchOnWindowFocus: true,
-    });
-}
-
-export function useCategory({ id, enabled = true }: UseCategoryOptions) {
-    return useQuery({
-        queryKey: ["category", id],
-        queryFn: () => getCategoryById(id),
-        enabled,
-    });
-}
-
-
-// Create Category
-export function useCreateCategory() {
+export function useCategories({ id, page = 0, pageSize = 100, enabled = true }: Props = {}) {
     const queryClient = useQueryClient();
 
-    return useMutation({
+    // --- QUERIES (GET) ---
+    // 1. Get All (Lista paginada)
+    const query = useQuery({
+        queryKey: ["categories", page, pageSize],
+        queryFn: () => getCategories(page * pageSize, pageSize),
+        enabled: enabled && !id, // Si pasaste un ID, asumimos que no querés la lista entera
+    });
+
+    // 2. Get Tree
+    const treeQuery = useQuery({
+        queryKey: ["categories-tree"],
+        queryFn: getCategoriesTree,
+        enabled: enabled && !id,
+    });
+
+    // 3. Get By ID (Una sola categoría)
+    const byIdQuery = useQuery({
+        queryKey: ["category", id],
+        queryFn: () => id ? getCategoryById(id) : Promise.reject("No ID provided"),
+        enabled: enabled && !!id, // Solo se ejecuta si pasaste un ID válido
+    });
+
+    // --- MUTATIONS (POST, PUT, DELETE) ---
+    const createMutation = useMutation({
         mutationFn: (data: CreateCategoryInput) => createCategory(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             queryClient.invalidateQueries({ queryKey: ["categories-tree"] });
         },
     });
-}
 
-// Update category
-
-export function useUpdateCategory() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({
-            id,
-            data,
-        }: {
-            id: number;
-            data: UpdateCategoryInput;
-        }) => updateCategory(id, data),
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: number, data: UpdateCategoryInput }) => updateCategory(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             queryClient.invalidateQueries({ queryKey: ["categories-tree"] });
+            queryClient.invalidateQueries({ queryKey: ["category"] }); // Invalidamos el individual también
         },
     });
-}
 
-// Delete category
-
-export function useDeleteCategory() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
+    const deleteMutation = useMutation({
         mutationFn: (id: number) => deleteCategory(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             queryClient.invalidateQueries({ queryKey: ["categories-tree"] });
         },
     });
-}
 
-
+    return {
+        // Datos
+        data: query.data,
+        treeData: treeQuery.data,
+        singleData: byIdQuery.data, // Acá esta GetById
+        
+        // Estados de carga y error
+        isLoading: query.isLoading || treeQuery.isLoading || byIdQuery.isLoading,
+        isFetching: query.isFetching || treeQuery.isFetching || byIdQuery.isFetching,
+        isError: query.isError || treeQuery.isError || byIdQuery.isError,
+        refetch: query.refetch,
+        refetchById: byIdQuery.refetch,
+        
+        // Acciones
+        create: createMutation.mutateAsync,
+        update: updateMutation.mutateAsync,
+        remove: deleteMutation.mutateAsync,
+    };
+}

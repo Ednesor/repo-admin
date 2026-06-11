@@ -7,14 +7,14 @@ import UserFilters from "../components/UserFilters";
 import UserModal from "../components/UserModal";
 import DeleteUserModal from "../components/DeleteUserModal";
 import UserDetailModal from "../components/UserDetailModal";
-import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from "../hooks/useUsers";
+import { useUsers } from "../hooks/useUsers";
 import { useUsersTable } from "../hooks/useUsersTable";
 import type { RoleCode, CreateUserInput, UpdateUserInput, UserPublicAdminPanel } from "@/types/user.types";
 
 const PAGE_SIZE = 10;
 
 export function UsersPage() {
-    const canCreate = useAuthStore((state) => state.canCreateProducts);
+    const canCreate = useAuthStore((state) => state.hasRole("ADMIN"));
     const [selectedRoles, setSelectedRoles] = useState<RoleCode[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -34,7 +34,7 @@ export function UsersPage() {
         setColumnFilters,
     } = useUsersTable();
 
-    const { data, isLoading, isError, isFetching } = useUsers({
+    const { data, isLoading, isError, isFetching, create, update, remove } = useUsers({
         page,
         pageSize: PAGE_SIZE,
         rolCodigo: selectedRoles.length === 1 ? selectedRoles[0] : undefined,
@@ -57,10 +57,6 @@ export function UsersPage() {
         pageSize: 1,
         rolCodigo: "PEDIDOS",
     });
-
-    const createUserMutation = useCreateUser();
-    const updateUserMutation = useUpdateUser();
-    const deleteUserMutation = useDeleteUser();
 
     const cardsItems = [
         {
@@ -143,7 +139,7 @@ export function UsersPage() {
                         {totalPages}
                     </p>
                 </div>
-                {canCreate() && (
+                {canCreate && (
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
@@ -179,9 +175,7 @@ export function UsersPage() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={async (formData) => {
-                    await createUserMutation.mutateAsync(
-                        formData as CreateUserInput,
-                    );
+                    await create(formData as CreateUserInput);
                 }}
                 mode="create"
             />
@@ -191,7 +185,7 @@ export function UsersPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingUser !== null) {
-                        await updateUserMutation.mutateAsync({
+                        await update({
                             id: editingUser.id,
                             data: formData as UpdateUserInput,
                         });
@@ -206,7 +200,7 @@ export function UsersPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingUserId !== null) {
-                        await deleteUserMutation.mutateAsync(deletingUserId);
+                        await remove(deletingUserId);
                     }
                 }}
                 userName={deletingUserName}

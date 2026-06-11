@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2, FiCheck, FiAlertTriangle } from "react-icons/fi";
-import { useIngredient } from "../hooks/useIngredients";
+import { useIngredients } from "../hooks/useIngredients";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export default function IngredientDetailPage() {
@@ -11,7 +11,7 @@ export default function IngredientDetailPage() {
     );
 
     const ingredientId = id ? parseInt(id, 10) : 0;
-    const { data: ingredient, isLoading, isError } = useIngredient({
+    const { singleData: ingredient, isLoading, isError } = useIngredients({
         id: ingredientId,
         enabled: !isNaN(ingredientId),
     });
@@ -123,7 +123,7 @@ export default function IngredientDetailPage() {
                                 Productos que contienen este ingrediente
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {ingredient.productos.map((prod) => (
+                                {ingredient.productos.map((prod: { id: number; nombre: string }) => (
                                     <span
                                         key={prod.id}
                                         className="bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full text-sm font-medium"

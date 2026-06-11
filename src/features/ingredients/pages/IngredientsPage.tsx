@@ -9,7 +9,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import IngredientModal from "@/shared/components/IngredientModal";
 import DeleteIngredientModal from "@/shared/components/DeleteIngredientModal";
-import { useCreateIngredient, useUpdateIngredient, useDeleteIngredient } from "../hooks/useIngredients";
 
 const PAGE_SIZE = 10;
 
@@ -24,10 +23,6 @@ export default function IngredientsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deletingIngredientId, setDeletingIngredientId] = useState<number | null>(null);
     const [deletingIngredientName, setDeletingIngredientName] = useState<string>("");
-
-    const createIngredientMutation = useCreateIngredient();
-    const updateIngredientMutation = useUpdateIngredient();
-    const deleteIngredientMutation = useDeleteIngredient();
 
     const handleEditIngredient = (ingredientId: number) => {
         setEditingIngredientId(ingredientId);
@@ -64,7 +59,7 @@ export default function IngredientsPage() {
         setColumnFilters,
     } = useIngredientsTable();
 
-    const { data, isLoading, isError, isFetching } = useIngredients({
+    const { data, isLoading, isError, isFetching, create, update, remove } = useIngredients({
         page,
         pageSize: PAGE_SIZE,
     });
@@ -119,7 +114,7 @@ export default function IngredientsPage() {
                         {totalPages}
                     </p>
                 </div>
-                {role !== "Admin" && (
+                {role === "Admin" && (
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
@@ -147,9 +142,7 @@ export default function IngredientsPage() {
             <IngredientModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={(formData) =>
-                    createIngredientMutation.mutateAsync(formData)
-                }
+                onSubmit={(formData) => create(formData)}
                 mode="create"
             />
             <IngredientModal
@@ -157,7 +150,7 @@ export default function IngredientsPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingIngredientId !== null) {
-                        await updateIngredientMutation.mutateAsync({
+                        await update({
                             id: editingIngredientId,
                             data: formData,
                         });
@@ -171,7 +164,7 @@ export default function IngredientsPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingIngredientId !== null) {
-                        await deleteIngredientMutation.mutateAsync(deletingIngredientId);
+                        await remove(deletingIngredientId);
                     }
                 }}
                 ingredientName={deletingIngredientName}
