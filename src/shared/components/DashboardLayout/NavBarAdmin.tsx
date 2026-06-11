@@ -3,14 +3,14 @@ import SucursalSelect from "./SucursalSelect";
 import type { Branch } from "./types";
 import { NavLink } from "react-router-dom";
 import { BsLayoutSidebarInsetReverse } from "react-icons/bs";
-import type { UserPublic } from "@/types/user.types";
+import type { UserPublic, RolPublic } from "@/types/user.types";
 import { useState } from "react";
 import { ROLE_LABELS } from "@/types/user.types";
 
 interface Props {
     mockBranches: Branch[];
     user: UserPublic | null;
-    roles: { codigo: string; nombre: string }[];
+    roles: RolPublic[];
     systemNavItems: { path: string; label: string; icon: React.ReactNode }[];
     navItems: { path: string; label: string; icon: React.ReactNode }[];
 }
