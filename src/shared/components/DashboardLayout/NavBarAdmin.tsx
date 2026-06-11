@@ -25,7 +25,7 @@ export default function NavBarAdmin({
     const [isMenuHidden] = useState(false);
 
     const displayName = user ? `${user.nombre} ${user.apellido}` : "Usuario";
-    const displayRole = roles.length > 0 ? ROLE_LABELS[roles[0].codigo] : "Sin rol";
+    const displayRole: string = roles.length > 0 ? ROLE_LABELS[roles[0].codigo] : "Sin rol";
     const initials = user ? `${user.nombre.charAt(0)}${user.apellido.charAt(0)}` : "U";
 
     return (
@@ -92,7 +92,7 @@ export default function NavBarAdmin({
                         {initials}
                     </div>
                     <div>
-                        <p className="text-sm font-medium truncate max-w-[140px]">{displayName}</p>
+                        <p className="text-sm font-medium truncate max-w-35">{displayName}</p>
                         <p className="text-xs text-neutral-400">{displayRole}</p>
                     </div>
                 </div>

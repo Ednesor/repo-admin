@@ -36,5 +36,26 @@ export const ROLE_DESCRIPTIONS: Record<RoleCode, string> = {
     STOCK: "Actualiza stock y disponible",
     PEDIDOS: "Avanza estados CONFIRMADO->ENTREGADO",
     CLIENT: "Opera solo sus propios datos",
-    COCINA: "Prepara los pedidos",
 };
+
+export interface CreateUserInput {
+    nombre: string;
+    apellido: string;
+    email: string;
+    celular: string;
+    password: string;
+    roles_codigos: RoleCode[];
+}
+
+export interface UpdateUserInput {
+    nombre: string;
+    apellido: string;
+    celular: string;
+    roles_codigos: RoleCode[];
+}
+
+export interface UserFilters {
+    offset?: number;
+    limit?: number;
+    rol_codigo?: RoleCode;
+}
