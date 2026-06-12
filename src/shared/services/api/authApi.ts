@@ -1,4 +1,4 @@
-import type { UserPublic } from "@/types/user.types";
+import type { UserPublicAdminPanel } from "@/types/user.types";
 import apiClient from "./axiosInstance";
 
 const AUTH = "/api/v1/auth";
@@ -34,8 +34,7 @@ export async function logout(): Promise<{ mensaje: string }> {
     return response.data;
 }
 
-//TODO : BUG GRAVE - `getCurrentUser` está tipeado como `Promise<UserPublic>` pero el backend `/usuarios/me` devuelve `UserPublicAdminPanel` que incluye `roles: List[RolPublic]`. Esto causa que el store nunca reciba los roles reales del backend y tenga que inferirlos por email (ver `useAuthStore.getDefaultRoleForUser`). Debe cambiarse a `Promise<UserPublicAdminPanel>`.
-export async function getCurrentUser(): Promise<UserPublic> {
-    const response = await apiClient.get<UserPublic>(`${USUARIOS}/me`);
+export async function getCurrentUser(): Promise<UserPublicAdminPanel> {
+    const response = await apiClient.get<UserPublicAdminPanel>(`${USUARIOS}/me`);
     return response.data;
 }
