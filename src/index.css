@@ -1,1 +1,68 @@
 @import "tailwindcss";
+
+@theme {
+  --color-surface-container: #f0ecf9;
+  --color-tertiary: #005338;
+  --color-inverse-primary: #c3c0ff;
+  --color-secondary-fixed: #f0dbff;
+  --color-on-tertiary-fixed-variant: #005236;
+  --color-secondary: #8127cf;
+  --color-surface: #fcf8ff;
+  --color-surface-container-low: #f5f2ff;
+  --color-primary: #3525cd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-tint: #4d44e3;
+  --color-on-tertiary-fixed: #002113;
+  --color-primary-container: #4f46e5;
+  --color-primary-fixed: #e2dfff;
+  --color-inverse-on-surface: #f3effc;
+  --color-on-primary-container: #dad7ff;
+  --color-surface-bright: #fcf8ff;
+  --color-outline-variant: #c7c4d8;
+  --color-on-secondary-fixed-variant: #6900b3;
+  --color-primary-fixed-dim: #c3c0ff;
+  --color-error: #ba1a1a;
+  --color-on-background: #1b1b24;
+  --color-on-primary: #ffffff;
+  --color-on-error-container: #93000a;
+  --color-surface-container-high: #eae6f4;
+  --color-on-tertiary-container: #67f4b7;
+  --color-surface-container-highest: #e4e1ee;
+  --color-on-secondary-fixed: #2c0051;
+  --color-background: #fcf8ff;
+  --color-on-secondary-container: #fffbff;
+  --color-secondary-container: #9c48ea;
+  --color-on-surface-variant: #464555;
+  --color-surface-variant: #e4e1ee;
+  --color-outline: #777587;
+  --color-on-tertiary: #ffffff;
+  --color-on-primary-fixed-variant: #3323cc;
+  --color-on-secondary: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-inverse-surface: #302f39;
+  --color-on-primary-fixed: #0f0069;
+  --color-tertiary-fixed: #6ffbbe;
+  --color-on-error: #ffffff;
+  --color-surface-dim: #dcd8e5;
+  --color-on-surface: #1b1b24;
+  --color-tertiary-fixed-dim: #4edea3;
+  --color-tertiary-container: #006e4b;
+  --color-secondary-fixed-dim: #ddb7ff;
+
+  --spacing-container-padding: 32px;
+  --spacing-gutter: 24px;
+  --spacing-section-margin: 48px;
+  --spacing-card-gap: 24px;
+  --spacing-base: 8px;
+}
+
+@layer utilities {
+  .elegant-shadow {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  }
+  .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}

@@ -19,10 +19,6 @@ export function ProtectedRoute({
     const isLoadingInitial = useAuthStore((s) => s.isLoadingInitial);
     const userRoles = useAuthStore((s) => s.roles);
 
-    //TODO : BUG GRAVE - Los console.log() de allowedRoles y userRoles filtran información sensible de autorización a la consola del navegador. Cualquier extensión o script malicioso puede leer qué roles están configurados y cuáles tiene el usuario. Deben eliminarse en producción.
-    console.log("[ProtectedRoute] allowedRoles:", allowedRoles);
-    console.log("[ProtectedRoute] userRoles:", userRoles);
-
     if (isLoadingInitial) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#fafaf7]">
