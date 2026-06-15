@@ -34,7 +34,7 @@ export function UsersPage() {
         setColumnFilters,
     } = useUsersTable();
 
-    const { data, isLoading, isError, isFetching, create, update, remove } = useUsers({
+    const { data, isLoading, isError, isFetching, createUser, updateUser, deleteUser } = useUsers({
         page,
         pageSize: PAGE_SIZE,
         rolCodigo: selectedRoles.length === 1 ? selectedRoles[0] : undefined,
@@ -175,8 +175,9 @@ export function UsersPage() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={async (formData) => {
-                    await create(formData as CreateUserInput);
+                    await createUser(formData as CreateUserInput);
                 }}
+
                 mode="create"
             />
 
@@ -185,7 +186,7 @@ export function UsersPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingUser !== null) {
-                        await update({
+                        await updateUser({
                             id: editingUser.id,
                             data: formData as UpdateUserInput,
                         });
@@ -200,7 +201,7 @@ export function UsersPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingUserId !== null) {
-                        await remove(deletingUserId);
+                        await deleteUser(deletingUserId);
                     }
                 }}
                 userName={deletingUserName}

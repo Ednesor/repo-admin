@@ -26,20 +26,24 @@ interface AuthState {
     canEditStock: () => boolean;
     canManageOrders: () => boolean;
     canAccessAdmin: () => boolean;
+    canManageUsers: () => boolean;
+    canManageCategories: () => boolean;
+    isOnlyKitchen: () => boolean;
 }
 
 
 export const useAuthStore = create<AuthState>()(
     persist(
-        (set, get) => ({
-            user: null,
-            roles: [],
-            isAuthenticated: false,
-            isLoading: false,
-            isLoadingInitial: true,
-            error: null,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (set: any, get: any) => ({
+            user: null as UserPublicAdminPanel | null,
+            roles: [] as RolPublic[],
+            isAuthenticated: false as boolean,
+            isLoading: false as boolean,
+            isLoadingInitial: true as boolean,
+            error: null as string | null,
 
-            setError: (msg) => set({ error: msg }),
+            setError: (msg: string | null) => set({ error: msg }),
 
             clearSession: () => {
                 set({
@@ -91,7 +95,7 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            login: async (username, password) => {
+            login: async (username: string, password: string) => {
                 set({ isLoading: true, error: null });
                 try {
                     await authApi.login({ username, password });
@@ -156,66 +160,78 @@ export const useAuthStore = create<AuthState>()(
             },
 
             // Verifica si el usuario tiene TODOS los roles especificados
-            hasRole: (...roles) => {
-                const { roles: userRoles } = get();
-                const userRoleCodes = userRoles.map((r) => r.codigo);
-                return roles.every((role) => userRoleCodes.includes(role));
+            hasRole: (...roles: RoleCode[]) => {
+                const userRoles = get().roles;
+                return roles.every((role) => userRoles.some((r: RolPublic) => r.codigo === role));
             },
 
             // Verifica si el usuario tiene AL MENOS UNO de los roles especificados
-            hasAnyRole: (roles) => {
-                const { roles: userRoles } = get();
-                //TODO : Deuda técnica - console.log de información de roles del usuario en producción, debe eliminarse.
-                console.log(userRoles, roles)
-                const userRoleCodes = userRoles.map((r) => r.codigo);
-                return roles.some((role) => userRoleCodes.includes(role));
+            hasAnyRole: (roles: RoleCode[]) => {
+                const userRoles = get().roles;
+                return roles.some((role) => userRoles.some((r: RolPublic) => r.codigo === role));
             },
 
             // Devuelve un array con los códigos de rol en formato string puro
             getRoleCodes: () => {
                 const { roles } = get();
-                return roles.map((r) => r.codigo);
+                return roles.map((r: RolPublic) => r.codigo);
+            },
+
+            // Lógica de negocio: Quién puede gestionar usuarios
+            canManageUsers: () => {
+                const roles = get().roles;
+                return roles.some((r: RolPublic) => r.codigo === "ADMIN");
+            },
+
+            // Lógica de negocio: Quién puede gestionar categorias
+            canManageCategories: () => {
+                const roles = get().roles;
+                return roles.some((r: RolPublic) => ["ADMIN", "STOCK"].includes(r.codigo));
             },
 
             // Lógica de negocio: Quién puede editar productos
             canEditProducts: () => {
-                const { roles } = get();
-                const roleCodes = roles.map((r) => r.codigo);
-                return roleCodes.includes("ADMIN") || roleCodes.includes("STOCK");
+                const roles = get().roles;
+                return roles.some((r: RolPublic) => ["ADMIN", "STOCK"].includes(r.codigo));
             },
 
             // Lógica de negocio: Quién puede borrar productos
             canDeleteProducts: () => {
                 const { roles } = get();
-                const roleCodes = roles.map((r) => r.codigo);
+                const roleCodes = roles.map((r: RolPublic) => r.codigo);
                 return roleCodes.includes("ADMIN");
             },
 
             // Lógica de negocio: Quién puede crear productos
             canCreateProducts: () => {
                 const { roles } = get();
-                const roleCodes = roles.map((r) => r.codigo);
+                const roleCodes = roles.map((r: RolPublic) => r.codigo);
                 return roleCodes.includes("ADMIN");
             },
 
             // Lógica de negocio: Quién puede modificar stock
             canEditStock: () => {
                 const { roles } = get();
-                const roleCodes = roles.map((r) => r.codigo);
+                const roleCodes = roles.map((r: RolPublic) => r.codigo);
                 return roleCodes.includes("ADMIN") || roleCodes.includes("STOCK");
+            },
+
+            // Lógica de negocio: Comprobar si es solo cocina
+            isOnlyKitchen: () => {
+                const roles = get().roles;
+                return roles.length === 1 && roles.some((r: RolPublic) => r.codigo === "COCINA");
             },
 
             // Lógica de negocio: Quién puede ver y cambiar estados de pedidos
             canManageOrders: () => {
-                const { roles } = get();
-                const roleCodes = roles.map((r) => r.codigo);
-                return roleCodes.includes("ADMIN") || roleCodes.includes("PEDIDOS") || roleCodes.includes("COCINA");
+                const roles = get().roles;
+                return roles.some((r: RolPublic) => ["ADMIN", "PEDIDOS", "COCINA"].includes(r.codigo));
             },
 
             // Puerta de entrada principal: Quién puede renderizar la vista del Panel
             canAccessAdmin: () => {
                 const { roles } = get();
-                const roleCodes = roles.map((r) => r.codigo);
+                const roleCodes = roles.map((r: RolPublic) => r.codigo);
                 return roleCodes.includes("ADMIN") ||
                     roleCodes.includes("STOCK") ||
                     roleCodes.includes("PEDIDOS") ||

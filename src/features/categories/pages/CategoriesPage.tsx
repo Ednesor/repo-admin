@@ -59,7 +59,7 @@ export default function CategoriesPage() {
         setColumnFilters,
     } = useCategoriesTable();
 
-    const { data, isLoading, isError, isFetching, create, update, remove } = useCategories({
+    const { data, isLoading, isError, isFetching, createCategory, updateCategory, deleteCategory } = useCategories({
         page,
         pageSize: PAGE_SIZE,
     });
@@ -143,7 +143,7 @@ export default function CategoriesPage() {
             <CategoryModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={(formData) => create(formData)}
+                onSubmit={(formData) => createCategory(formData)}
                 mode="create"
             />
             <CategoryModal
@@ -151,7 +151,7 @@ export default function CategoriesPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingCategoryId !== null) {
-                        await update({
+                        await updateCategory({
                             id: editingCategoryId,
                             data: formData,
                         });
@@ -165,7 +165,7 @@ export default function CategoriesPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingCategoryId !== null) {
-                        await remove(deletingCategoryId);
+                        await deleteCategory(deletingCategoryId);
                     }
                 }}
                 categoryName={deletingCategoryName}

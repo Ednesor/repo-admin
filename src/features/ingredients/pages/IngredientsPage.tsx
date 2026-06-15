@@ -59,7 +59,7 @@ export default function IngredientsPage() {
         setColumnFilters,
     } = useIngredientsTable();
 
-    const { data, isLoading, isError, isFetching, create, update, remove } = useIngredients({
+    const { data, isLoading, isError, isFetching, createIngredient, updateIngredient, deleteIngredient } = useIngredients({
         page,
         pageSize: PAGE_SIZE,
     });
@@ -142,7 +142,7 @@ export default function IngredientsPage() {
             <IngredientModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={(formData) => create(formData)}
+                onSubmit={(formData) => createIngredient(formData)}
                 mode="create"
             />
             <IngredientModal
@@ -150,7 +150,7 @@ export default function IngredientsPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingIngredientId !== null) {
-                        await update({
+                        await updateIngredient({
                             id: editingIngredientId,
                             data: formData,
                         });
@@ -164,7 +164,7 @@ export default function IngredientsPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingIngredientId !== null) {
-                        await remove(deletingIngredientId);
+                        await deleteIngredient(deletingIngredientId);
                     }
                 }}
                 ingredientName={deletingIngredientName}

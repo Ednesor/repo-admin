@@ -1,9 +1,9 @@
 import axios, { type AxiosError, type AxiosResponse } from "axios";
-import { getApiBase } from "./config";
+import { API_BASE_URL } from "./config";
 import { useAuthStore } from "@/store/useAuthStore";
 
 export const apiClient = axios.create({
-    baseURL: getApiBase(),
+    baseURL: API_BASE_URL,
     withCredentials: true,
     timeout: 10000,
     headers: {
