@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiPlus, FiTrash2, FiLoader } from "react-icons/fi";
 import { useCategories } from "@/features/categories/hooks/useCategories";
-import { useIngredients } from "@/features/products/hooks/useIngredients";
+import { useIngredients } from "@/features/ingredients/hooks/useIngredients";
 import { useProducts } from "@/features/products/hooks/useProducts";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { CategoriaPublic } from "@/types/categoria.types";
 import type { IngredientsPublic } from "@/types/ingredients.types";
 import type { CreateProductInput } from "@/types/products.types";
@@ -26,7 +27,6 @@ const defaultForm: CreateProductInput = {
     ingredientes: [],
 };
 
-// TODO: ROL STOCK necesita poder actualizar SOLAMENTE el stock. Actualmente se le deniega por permisos al intentar mandar todo el form, y además la UI no le desactiva los demás campos. Debería mostrarse en modo "solo lectura" para los demás campos y permitir editar únicamente stock_cantidad si el rol es STOCK.
 export default function ProductModal({
     isOpen,
     onClose,
@@ -44,7 +44,13 @@ export default function ProductModal({
     const lastLoadedProductId = useRef<number | null>(null);
 
     const { treeData: categoriesData } = useCategories();
-    const { data: ingredientsData } = useIngredients();
+    const { allData: ingredientsData } = useIngredients({ fetchAll: true });
+
+    // Se desabilita todos los inputs menos el de stock
+    const isOnlyStock = useAuthStore((s) => {
+        const codes = s.getRoleCodes();
+        return codes.includes("STOCK") && !codes.includes("ADMIN");
+    });
 
     const { singleData: productData, isLoading: isLoadingProduct } = useProducts({
         id: productId ?? 0,
@@ -131,7 +137,11 @@ export default function ProductModal({
 
         setIsSubmitting(true);
         try {
-            await onSubmit(form);
+            let dataToSubmit = form;
+            if (isOnlyStock && mode === "edit") {
+                dataToSubmit = { stock_cantidad: form.stock_cantidad } as CreateProductInput;
+            }
+            await onSubmit(dataToSubmit);
             resetForm();
             onClose();
         } catch (err: unknown) {
@@ -223,7 +233,8 @@ export default function ProductModal({
                                                 nombre: e.target.value,
                                             }))
                                         }
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        disabled={isOnlyStock}
+                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
                                         placeholder="Nombre del producto"
                                     />
                                 </div>
@@ -240,8 +251,9 @@ export default function ProductModal({
                                                 descripcion: e.target.value,
                                             }))
                                         }
+                                        disabled={isOnlyStock}
                                         rows={3}
-                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:text-gray-500"
                                         placeholder="Descripción del producto"
                                     />
                                 </div>
@@ -263,7 +275,8 @@ export default function ProductModal({
                                                         parseFloat(e.target.value) || 0,
                                                 }))
                                             }
-                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            disabled={isOnlyStock}
+                                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
                                             placeholder="0.00"
                                         />
                                     </div>
@@ -292,17 +305,18 @@ export default function ProductModal({
                                 <div className="flex items-center gap-3">
                                     <label className="flex items-center gap-2 cursor-pointer">
                                         <div
-                                            onClick={() =>
+                                            onClick={() => {
+                                                if (isOnlyStock) return;
                                                 setForm((prev) => ({
                                                     ...prev,
                                                     disponible: !prev.disponible,
-                                                }))
-                                            }
+                                                }));
+                                            }}
                                             className={`w-11 h-6 rounded-full transition-colors relative ${
                                                 form.disponible
                                                     ? "bg-amber-500"
                                                     : "bg-gray-200"
-                                            }`}
+                                            } ${isOnlyStock ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                                         >
                                             <div
                                                 className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
@@ -325,10 +339,11 @@ export default function ProductModal({
                                     <div className="relative">
                                         <button
                                             type="button"
+                                            disabled={isOnlyStock}
                                             onClick={() =>
                                                 setCategoriesOpen((prev) => !prev)
                                             }
-                                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700 hover:border-gray-300 transition-colors"
+                                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700 hover:border-gray-300 transition-colors disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                                         >
                                             <span>
                                                 {form.categoria_ids.length > 0
@@ -405,8 +420,7 @@ export default function ProductModal({
                                                                 {category.nombre}
                                                             </button>
 
-                                                            {category.subcategorias
-                                                                ?.length > 0 && (
+                                                            {category.subcategorias && category.subcategorias.length > 0 && (
                                                                 <div className="ml-5 flex flex-col gap-1">
                                                                     {category.subcategorias.map(
                                                                         (
@@ -468,10 +482,11 @@ export default function ProductModal({
                                     <div className="relative">
                                         <button
                                             type="button"
+                                            disabled={isOnlyStock}
                                             onClick={() =>
                                                 setIngredientsOpen((prev) => !prev)
                                             }
-                                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700 hover:border-gray-300 transition-colors"
+                                            className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700 hover:border-gray-300 transition-colors disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                                         >
                                             <span>
                                                 {(form.ingredientes ?? []).length > 0
@@ -512,7 +527,7 @@ export default function ProductModal({
                                                     Todos los ingredientes
                                                 </button>
 
-                                                {ingredientsData?.map(
+                                                {ingredientsData?.data?.map(
                                                     (ingredient: IngredientsPublic) => (
                                                         <button
                                                             key={ingredient.id}
@@ -574,13 +589,15 @@ export default function ProductModal({
                                                     addImageUrl();
                                                 }
                                             }}
-                                            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            disabled={isOnlyStock}
+                                            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
                                             placeholder="https://example.com/image.jpg"
                                         />
                                         <button
                                             type="button"
                                             onClick={addImageUrl}
-                                            className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                                            disabled={isOnlyStock}
+                                            className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <FiPlus className="w-5 h-5 text-gray-600" />
                                         </button>
@@ -599,10 +616,11 @@ export default function ProductModal({
                                                         </span>
                                                         <button
                                                             type="button"
+                                                            disabled={isOnlyStock}
                                                             onClick={() =>
                                                                 removeImageUrl(index)
                                                             }
-                                                            className="p-1 hover:bg-gray-200 rounded transition-colors"
+                                                            className="p-1 hover:bg-gray-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                         >
                                                             <FiTrash2 className="w-4 h-4 text-red-500" />
                                                         </button>

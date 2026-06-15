@@ -100,7 +100,7 @@ export default function ProductsFilters({
                             </button>
 
                             {/* SUBCATEGORIES */}
-                            {category.subcategorias?.length > 0 && (
+                            {category.subcategorias && category.subcategorias.length > 0 && (
                                 <div className="ml-6 mt-1 flex flex-col gap-1">
                                     {category.subcategorias.map(
                                         (subcategory: CategoriaPublic) => (
