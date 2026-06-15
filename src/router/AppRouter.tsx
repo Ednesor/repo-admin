@@ -4,6 +4,7 @@ import CategoriesPage from "@/features/categories/pages/CategoriesPage";
 import CategoryDetailPage from "@/features/categories/pages/CategoryDetailPage";
 import ClientsPage from "@/features/clients/pages/ClientsPage";
 import HelpPages from "@/features/help/pages/HelpPages";
+import { HomePage } from "@/features/home/pages/HomePage";
 import IngredientsPage from "@/features/ingredients/pages/IngredientsPage";
 import IngredientDetailPage from "@/features/ingredients/pages/IngredientDetailPage";
 import { ProductsPage } from "@/features/products/pages/ProductsPage";
@@ -21,8 +22,17 @@ export default function AppRouter() {
                 <Route index element={<LoginPage />} />
 
                 <Route element={<DashboardLayout />}>
-                    <Route element={<ProtectedRoute allowedRoles={["ADMIN", "STOCK", "PEDIDOS"]} />}>
-                        <Route path="/panel" element={<ProductsPage />} />
+                    <Route
+                        element={
+                            <ProtectedRoute
+                                allowedRoles={["ADMIN", "STOCK", "PEDIDOS", "COCINA"]}
+                            />
+                        }
+                    >
+                        <Route path="/inicio" element={<HomePage />} />
+                    </Route>
+
+                    <Route element={<ProtectedRoute allowedRoles={["ADMIN", "STOCK"]} />}>
                         <Route path="/productos" element={<ProductsPage />} />
                         <Route path="/productos/:id" element={<ProductDetailPage />} />
                     </Route>
@@ -49,7 +59,7 @@ export default function AppRouter() {
                     </Route>
 
                     <Route path="/ayuda" element={<HelpPages />} />
-                    <Route path="*" element={<Navigate to="/panel" replace />} />
+                    <Route path="*" element={<Navigate to="/inicio" replace />} />
                 </Route>
             </Routes>
         </BrowserRouter>

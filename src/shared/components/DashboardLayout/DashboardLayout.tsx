@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { Branch } from "./types";
-import { MdOutlineDashboard, MdOutlineListAlt, MdSoupKitchen } from "react-icons/md";
+import { MdOutlineListAlt, MdSoupKitchen, MdSpaceDashboard } from "react-icons/md";
 import { ImStack } from "react-icons/im";
 import { TbBottle } from "react-icons/tb";
 import { BiCategoryAlt } from "react-icons/bi";
@@ -14,7 +14,7 @@ import { RiAdminLine } from "react-icons/ri";
 const navItems = [
     // TODO: Filtrar estos items del sidebar según el rol (COCINA, PEDIDOS, STOCK, etc.).
     // Actualmente ROL COCINA no puede entrar a operaciones, y ROL STOCK/PEDIDOS ven cosas de más.
-    { path: "/panel", label: "Panel", icon: <MdOutlineDashboard /> },
+    { path: "/inicio", label: "Inicio", icon: <MdSpaceDashboard /> },
     { path: "/pedidos", label: "Pedidos", icon: <MdOutlineListAlt /> },
     { path: "/cocina", label: "Cocina", icon: <MdSoupKitchen /> },
     { path: "/productos", label: "Productos", icon: <ImStack /> },
