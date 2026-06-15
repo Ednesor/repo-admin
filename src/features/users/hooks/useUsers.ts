@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUsers, createUser, updateUser, deleteUser } from "@/shared/services/api/usersApi";
+import { getUsers, createUser as apiCreateUser, updateUser as apiUpdateUser, deleteUser as apiDeleteUser } from "@/shared/services/api/usersApi";
 import type { CreateUserInput, UpdateUserInput } from "@/types/user.types";
 
 interface Props {
@@ -14,7 +14,7 @@ export function useUsers({ page = 0, pageSize = 100, rolCodigo, enabled = true }
 
     // --- QUERIES (GET) ---
     // 1. Listar usuarios (Paginados)
-    const query = useQuery({
+    const getUsersAll = useQuery({
         queryKey: ["users", page, pageSize, rolCodigo],
         queryFn: () =>
             getUsers({
@@ -30,25 +30,25 @@ export function useUsers({ page = 0, pageSize = 100, rolCodigo, enabled = true }
 
     // --- MUTATIONS (POST/PUT/DELETE) ---
     // 2. Crear usuario
-    const createMutation = useMutation({
-        mutationFn: (data: CreateUserInput) => createUser(data),
+    const createUser = useMutation({
+        mutationFn: (data: CreateUserInput) => apiCreateUser(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
         },
     });
 
     // 3. Actualizar usuario
-    const updateMutation = useMutation({
+    const updateUser = useMutation({
         mutationFn: ({ id, data }: { id: number; data: UpdateUserInput }) =>
-            updateUser(id, data),
+            apiUpdateUser(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
         },
     });
 
     // 4. Eliminar usuario
-    const deleteMutation = useMutation({
-        mutationFn: (id: number) => deleteUser(id),
+    const deleteUser = useMutation({
+        mutationFn: (id: number) => apiDeleteUser(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
         },
@@ -56,17 +56,17 @@ export function useUsers({ page = 0, pageSize = 100, rolCodigo, enabled = true }
 
     return {
         // Datos
-        data: query.data,
-        
+        data: getUsersAll.data,
+
         // Carga y recarga
-        isLoading: query.isLoading,
-        isFetching: query.isFetching,
-        isError: query.isError,
-        refetch: query.refetch,
-        
+        isLoading: getUsersAll.isLoading,
+        isFetching: getUsersAll.isFetching,
+        isError: getUsersAll.isError,
+        refetch: getUsersAll.refetch,
+
         // Acciones
-        create: createMutation.mutateAsync,
-        update: updateMutation.mutateAsync,
-        remove: deleteMutation.mutateAsync,
+        createUser: createUser.mutateAsync,
+        updateUser: updateUser.mutateAsync,
+        deleteUser: deleteUser.mutateAsync,
     };
 }

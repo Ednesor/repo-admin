@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getIngredientsList, getIngredientById, createIngredient, updateIngredient, deleteIngredient } from "@/shared/services/api/ingredientsApi";
+import { getIngredientsList, getIngredientById, createIngredient as apiCreateIngredient, updateIngredient as apiUpdateIngredient, deleteIngredient as apiDeleteIngredient } from "@/shared/services/api/ingredientsApi";
 import type { CreateIngredientInput, UpdateIngredientInput } from "@/types/ingredients.types";
 
 interface Props {
@@ -21,7 +21,7 @@ export function useIngredients({
 
     // --- QUERIES (GET) ---
     // 1. Listar ingredientes (Paginados)
-    const ingredientsQuery = useQuery({
+    const getIngredientsAll = useQuery({
         queryKey: ["ingredients", page, pageSize],
         queryFn: () => getIngredientsList(page * pageSize, pageSize),
         staleTime: 0,
@@ -31,7 +31,7 @@ export function useIngredients({
     });
 
     // 2. Listar TODOS los ingredientes
-    const allIngredientsQuery = useQuery({
+    const getIngredientsFullList = useQuery({
         queryKey: ["ingredients", "all"],
         queryFn: () => getIngredientsList(),
         staleTime: 0,
@@ -40,7 +40,7 @@ export function useIngredients({
     });
 
     // 3. Obtener ingrediente por ID
-    const ingredientByIdQuery = useQuery({
+    const ingredientById = useQuery({
         queryKey: ["ingredient", id],
         queryFn: () => id ? getIngredientById(id) : Promise.reject("No ID provided"),
         enabled: enabled && !!id, // Solo se ejecuta si el salvavidas esta activo y hay ID
@@ -48,17 +48,17 @@ export function useIngredients({
 
     // --- MUTATIONS (POST/PUT/DELETE) ---
     // 4. Crear ingrediente
-    const createMutation = useMutation({
-        mutationFn: (data: CreateIngredientInput) => createIngredient(data),
+    const createIngredient = useMutation({
+        mutationFn: (data: CreateIngredientInput) => apiCreateIngredient(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ingredients"] });
         },
     });
 
     // 5. Actualizar ingrediente
-    const updateMutation = useMutation({
+    const updateIngredient = useMutation({
         mutationFn: ({ id, data }: { id: number; data: UpdateIngredientInput }) =>
-            updateIngredient(id, data),
+            apiUpdateIngredient(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ingredients"] });
             queryClient.invalidateQueries({ queryKey: ["ingredient"] }); // Invalida el individual tambien
@@ -66,8 +66,8 @@ export function useIngredients({
     });
 
     // 6. Eliminar ingrediente
-    const deleteMutation = useMutation({
-        mutationFn: (id: number) => deleteIngredient(id),
+    const deleteIngredient = useMutation({
+        mutationFn: (id: number) => apiDeleteIngredient(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ingredients"] });
         },
@@ -75,21 +75,21 @@ export function useIngredients({
 
     return {
         // Datos
-        data: ingredientsQuery.data,
-        allData: allIngredientsQuery.data,
-        singleData: ingredientByIdQuery.data,
-        
+        data: getIngredientsAll.data,
+        allData: getIngredientsFullList.data,
+        singleData: ingredientById.data,
+
         // Carga y recarga
-        isLoading: ingredientsQuery.isLoading || ingredientByIdQuery.isLoading || allIngredientsQuery.isLoading,
-        isFetching: ingredientsQuery.isFetching || ingredientByIdQuery.isFetching || allIngredientsQuery.isFetching,
-        isError: ingredientsQuery.isError || ingredientByIdQuery.isError || allIngredientsQuery.isError,
-        refetch: ingredientsQuery.refetch,
-        refetchById: ingredientByIdQuery.refetch,
-        refetchAll: allIngredientsQuery.refetch,
-        
+        isLoading: getIngredientsAll.isLoading || ingredientById.isLoading || getIngredientsFullList.isLoading,
+        isFetching: getIngredientsAll.isFetching || ingredientById.isFetching || getIngredientsFullList.isFetching,
+        isError: getIngredientsAll.isError || ingredientById.isError || getIngredientsFullList.isError,
+        refetch: getIngredientsAll.refetch,
+        refetchById: ingredientById.refetch,
+        refetchAll: getIngredientsFullList.refetch,
+
         // Acciones
-        create: createMutation.mutateAsync,
-        update: updateMutation.mutateAsync,
-        remove: deleteMutation.mutateAsync,
+        createIngredient: createIngredient.mutateAsync,
+        updateIngredient: updateIngredient.mutateAsync,
+        deleteIngredient: deleteIngredient.mutateAsync,
     };
 }
