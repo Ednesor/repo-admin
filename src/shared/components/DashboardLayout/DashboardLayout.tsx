@@ -1,5 +1,7 @@
+import { useMemo, type ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
+import type { RoleCode } from "@/types/user.types";
 import type { Branch } from "./types";
 import { MdOutlineListAlt, MdSoupKitchen, MdSpaceDashboard } from "react-icons/md";
 import { ImStack } from "react-icons/im";
@@ -11,17 +13,22 @@ import NavBarAdmin from "./NavBarAdmin";
 import NavBarUp from "./NavBarUp";
 import { RiAdminLine } from "react-icons/ri";
 
-const navItems = [
-    // TODO: Filtrar estos items del sidebar según el rol (COCINA, PEDIDOS, STOCK, etc.).
-    // Actualmente ROL COCINA no puede entrar a operaciones, y ROL STOCK/PEDIDOS ven cosas de más.
-    { path: "/inicio", label: "Inicio", icon: <MdSpaceDashboard /> },
-    { path: "/pedidos", label: "Pedidos", icon: <MdOutlineListAlt /> },
-    { path: "/cocina", label: "Cocina", icon: <MdSoupKitchen /> },
-    { path: "/productos", label: "Productos", icon: <ImStack /> },
-    { path: "/ingredientes", label: "Ingredientes", icon: <TbBottle /> },
-    { path: "/categorias", label: "Categorías", icon: <BiCategoryAlt /> },
-    { path: "/clientes", label: "Clientes", icon: <LuUsers /> },
-    { path: "/usuarios", label: "Usuarios", icon: <RiAdminLine /> },
+interface NavItem {
+    path: string;
+    label: string;
+    icon: ReactNode;
+    allowedRoles: RoleCode[];
+}
+
+const navItems: NavItem[] = [
+    { path: "/inicio", label: "Inicio", icon: <MdSpaceDashboard />, allowedRoles: ["ADMIN", "STOCK", "PEDIDOS", "COCINA"] },
+    { path: "/pedidos", label: "Pedidos", icon: <MdOutlineListAlt />, allowedRoles: ["ADMIN", "PEDIDOS"] },
+    { path: "/cocina", label: "Cocina", icon: <MdSoupKitchen />, allowedRoles: ["ADMIN", "COCINA"] },
+    { path: "/productos", label: "Productos", icon: <ImStack />, allowedRoles: ["ADMIN", "STOCK"] },
+    { path: "/ingredientes", label: "Ingredientes", icon: <TbBottle />, allowedRoles: ["ADMIN"] },
+    { path: "/categorias", label: "Categorías", icon: <BiCategoryAlt />, allowedRoles: ["ADMIN"] },
+    { path: "/clientes", label: "Clientes", icon: <LuUsers />, allowedRoles: ["ADMIN"] },
+    { path: "/usuarios", label: "Usuarios", icon: <RiAdminLine />, allowedRoles: ["ADMIN"] },
 ];
 const systemNavItems = [
     { path: "/ayuda", label: "Ayuda", icon: <FaRegQuestionCircle /> },
@@ -38,6 +45,17 @@ const mockBranches: Branch[] = [
 export function DashboardLayout() {
     const { user, roles } = useAuthStore();
     console.log(roles)
+
+    const visibleNavItems = useMemo(
+        () => {
+            const roleCodes = roles.map((r) => r.codigo);
+            return navItems.filter((item) =>
+                item.allowedRoles.some((role) => roleCodes.includes(role)),
+            );
+        },
+        [roles],
+    );
+
     return (
         <div className="min-h-screen flex">
             <NavBarAdmin
@@ -45,7 +63,7 @@ export function DashboardLayout() {
                 user={user}
                 roles={roles}
                 systemNavItems={systemNavItems}
-                navItems={navItems}
+                navItems={visibleNavItems}
             />
 
             <div className="flex-1 flex flex-col bg-[#fafaf7]">
