@@ -95,7 +95,7 @@ export default function TableIngredients({
     );
 
     const table = useReactTable({
-        data: data?.data ?? [],
+        data: data?.items ?? [],
         columns,
         state: {
             sorting,
@@ -107,7 +107,7 @@ export default function TableIngredients({
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-    });
+    })
 
     return (
         <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">

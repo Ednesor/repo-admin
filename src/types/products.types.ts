@@ -14,9 +14,9 @@ export interface ProductsPublic {
 }
 
 export interface ProductFilters {
-    offset?: number;
-    limit?: number;
-    include_only_active?: boolean;
+    page?: number;
+    size?: number;
+    disponible?: boolean;
     categoria_ids?: number[];
     ingrediente_ids?: number[];
 }
@@ -29,6 +29,5 @@ export interface CreateProductInput {
     stock_cantidad: number;
     disponible: boolean;
     categoria_ids: number[];
-    //TODO : BUG GRAVE - El backend espera `ingredientes: { ingrediente_id: number, es_removible: boolean }[]` (array de objetos con id + flag booleano), pero el frontend envía `ingrediente_ids: number[]` (array plano de números). Esto causa que la creación y edición de productos FALLE con error de validación. Debe cambiarse a `ingredientes: { ingrediente_id: number; es_removible: boolean }[]`.
-    ingrediente_ids: number[];
+    ingredientes: { ingrediente_id: number; es_removible: boolean }[]; 
 }

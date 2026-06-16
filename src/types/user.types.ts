@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from "./pagination.types";
+
 export type RoleCode = "ADMIN" | "STOCK" | "PEDIDOS" | "CLIENT" | "COCINA";
 
 export interface RolPublic {
@@ -18,10 +20,7 @@ export interface UserPublicAdminPanel extends UserPublic {
     roles: RolPublic[];
 }
 
-export interface UserPaginationResponse {
-    data: UserPublicAdminPanel[];
-    total: number;
-}
+export type UserPaginationResponse = PaginatedResponse<UserPublicAdminPanel>;
 
 export const ROLE_LABELS: Record<RoleCode, string> = {
     ADMIN: "Administrador",
@@ -56,7 +55,7 @@ export interface UpdateUserInput {
 }
 
 export interface UserFilters {
-    offset?: number;
-    limit?: number;
+    page?: number;
+    size?: number;
     rol_codigo?: RoleCode;
 }

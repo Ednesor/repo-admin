@@ -12,27 +12,37 @@ export const apiClient = axios.create({
     },
 });
 
-apiClient.interceptors.request.use(
-    (config) => {
-        return config;
-    },
-    (error: AxiosError) => {
-        console.error("Error en request: ", error);
-        return Promise.reject(error);
-    },
-);
+let isRefreshing = false;
 
 apiClient.interceptors.response.use(
-    (response: AxiosResponse) => {
-        return response;
-    },
+    (response: AxiosResponse) => response,
     async (error: AxiosError) => {
-        if (error.response?.status === 401) {
-            console.warn("Session expirada (401), limpiando...");
-            useAuthStore.getState().clearSession();
+        const originalRequest = error.config;
+
+        if (error.response?.status === 401 && originalRequest && !originalRequest.headers._retry) {
+            
+            if (isRefreshing) {
+                return Promise.reject(error);
+            }
+
+            originalRequest.headers._retry = true;
+            isRefreshing = true;
+
+            try {
+                await apiClient.post("/api/v1/auth/refresh"); 
+                
+                isRefreshing = false;
+                
+                return apiClient(originalRequest);
+            } catch (refreshError) {
+                isRefreshing = false;
+                console.warn("Refresh token expirado, cerrando sesión...");
+                useAuthStore.getState().clearSession();
+                return Promise.reject(refreshError);
+            }
         }
         return Promise.reject(error);
-    },
+    }
 );
 
 export default apiClient;

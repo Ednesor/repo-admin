@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { RoleCode } from "@/types/user.types";
 
@@ -15,33 +15,32 @@ export function ProtectedRoute({
     allowedRoles,
     redirectTo = "/",
 }: ProtectedRouteProps) {
+    const location = useLocation();
+    
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
     const isLoadingInitial = useAuthStore((s) => s.isLoadingInitial);
     const userRoles = useAuthStore((s) => s.roles);
 
-    //TODO : BUG GRAVE - Los console.log() de allowedRoles y userRoles filtran información sensible de autorización a la consola del navegador. Cualquier extensión o script malicioso puede leer qué roles están configurados y cuáles tiene el usuario. Deben eliminarse en producción.
-    console.log("[ProtectedRoute] allowedRoles:", allowedRoles);
-    console.log("[ProtectedRoute] userRoles:", userRoles);
-
     if (isLoadingInitial) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#fafaf7]">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-gray-500">Cargando...</p>
-                </div>
+                <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
+    // 1. Si no está autenticado, redirigir al login
     if (!isAuthenticated) {
-        return <Navigate to={redirectTo} replace />;
+        return <Navigate to={redirectTo} state={{ from: location }} replace />;
     }
 
+    // 2. Validación de roles
     if (allowedRoles && allowedRoles.length > 0) {
         const userRoleCodes = userRoles.map((r) => r.codigo);
         const hasAccess = allowedRoles.some((role) => userRoleCodes.includes(role));
+        
         if (!hasAccess) {
+            // Si no tiene acceso, lo redirigimos directo al panel
             return <Navigate to="/panel" replace />;
         }
     }

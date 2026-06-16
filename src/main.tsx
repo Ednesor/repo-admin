@@ -1,6 +1,7 @@
 import { StrictMode, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'; 
 import './index.css';
 import AppRouter from './router/AppRouter';
 import { useAuthStore } from './store/useAuthStore';
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')!).render(
             <AuthInitializer>
                 <AppRouter />
             </AuthInitializer>
+            <ReactQueryDevtools initialIsOpen={false} /> 
         </QueryClientProvider>
     </StrictMode>
 );

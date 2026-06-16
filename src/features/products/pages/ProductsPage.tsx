@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import ProductModal from "@/shared/components/ProductModal";
 import DeleteProductModal from "@/shared/components/DeleteProductModal";
 
-
 const PAGE_SIZE = 10;
 
 export function ProductsPage() {
@@ -81,27 +80,8 @@ export function ProductsPage() {
     const updateProductMutation = useUpdateProduct();
     const deleteProductMutation = useDeleteProduct();
 
-    //TODO : Deuda técnica - Hacer 3 peticiones HTTP paralelas (`data`, `dataAvailable`, `dataUnavailable`) solo para obtener los totales de las tarjetas de estadísticas es extremadamente ineficiente. Cada petición dispara una query con JOINs en el backend. Debería existir un endpoint único `/productos/stats` que devuelva todos los contadores en una sola respuesta.
-    //TODO : Deuda técnica - El parámetro "avaliable" tiene un typo (debería ser "available"). Además, se mapea a `include_only_active` en `productsApi.ts`, pero el backend espera `disponible`.
-    const {
-        data: dataAvailable,
-        isLoading: isLoadingAvailable,
-        isError: isErrorAvailable,
-    } = useProducts({
-        page,
-        pageSize: PAGE_SIZE,
-        avaliable: true,
-    });
-
-    const {
-        data: dataUnavailable,
-        isLoading: isLoadingUnavailable,
-        isError: isErrorUnavailable,
-    } = useProducts({
-        page,
-        pageSize: PAGE_SIZE,
-        avaliable: false,
-    });
+    const pageItems = data?.items ?? []; 
+    const disponiblesEnPagina = pageItems.filter(p => p.disponible).length;
 
     const cardsItems = [
         {
@@ -112,32 +92,26 @@ export function ProductsPage() {
         },
         {
             Icon: GoStack,
-            title: String(dataAvailable?.total ?? 0),
-            description: "Productos disponibles",
+            title: String(disponiblesEnPagina),
+            description: "Disponibles (en esta pág)",
             iconColor: "bg-green-200",
         },
         {
             Icon: GoStack,
-            //TODO : BUG GRAVE - El valor de "Sin stock" está hardcodeado a "1" en lugar de calcularse dinámicamente. Esto muestra información falsa al administrador.
-            title: "1",
+            title: "-", 
             description: "Sin stock",
             iconColor: "bg-red-200",
         },
         {
             Icon: GoStack,
-            title: String(dataUnavailable?.total ?? 0),
-            //TODO : Deuda técnica - Typo en "Deshabilitaods" (debería ser "Deshabilitados").
-            description: "Deshabilitaods",
+            title: String(pageItems.length - disponiblesEnPagina),
+            description: "Deshabilitados (en esta pág)",
             iconColor: "bg-gray-200",
         },
     ];
 
-    if (isLoading || isLoadingAvailable || isLoadingUnavailable)
-        return <div className="p-6">Cargando productos...</div>;
-    if (isError || isErrorAvailable || isErrorUnavailable)
-        return (
-            <div className="p-6 text-red-600">Error al cargar productos</div>
-        );
+    if (isLoading) return <div className="p-6">Cargando productos...</div>;
+    if (isError) return <div className="p-6 text-red-600">Error al cargar productos</div>;
 
     const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE);
 

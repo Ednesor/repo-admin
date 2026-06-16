@@ -15,7 +15,7 @@ const PAGE_SIZE = 10;
 
 export default function CategoriesPage() {
     const role = useAuthStore((state) =>
-        state.hasRole("admin") ? "Admin" : "User",
+        state.hasRole("ADMIN") ? "Admin" : "User",
     );
     const navigate = useNavigate();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -68,15 +68,11 @@ export default function CategoriesPage() {
         page,
         pageSize: PAGE_SIZE,
     });
+    const categories = data?.items ?? [];
 
-    const { data: dataAll } = useCategories({
-        page: 0,
-        pageSize: 1000,
-    });
-
-    const totalParent = dataAll?.data.filter((c) => c.parent_id === null).length ?? 0;
-    const totalSubcategories = dataAll?.data.filter((c) => c.parent_id !== null).length ?? 0;
-    const totalWithProducts = dataAll?.data.filter((c) => (c.productos?.length ?? 0) > 0).length ?? 0;
+    const totalParent = categories.filter((c) => c.parent_id === null).length;
+    const totalSubcategories = categories.filter((c) => c.parent_id !== null).length;
+    const totalWithProducts = categories.filter((c) => (c.productos?.length ?? 0) > 0).length;
 
     const cardsItems = [
         {
@@ -88,19 +84,19 @@ export default function CategoriesPage() {
         {
             Icon: GoStack,
             title: String(totalParent),
-            description: "Categorías principales",
+            description: "Principales (en esta pág)",
             iconColor: "bg-orange-200",
         },
         {
             Icon: GoStack,
             title: String(totalSubcategories),
-            description: "Subcategorías",
+            description: "Subcategorías (en esta pág)",
             iconColor: "bg-purple-200",
         },
         {
             Icon: GoStack,
             title: String(totalWithProducts),
-            description: "Con productos",
+            description: "Con productos (en esta pág)",
             iconColor: "bg-green-200",
         },
     ];

@@ -64,18 +64,17 @@ export default function IngredientsPage() {
         setColumnFilters,
     } = useIngredientsTable();
 
+    // HACEMOS UNA SOLA LLAMADA AL BACKEND
     const { data, isLoading, isError, isFetching } = useIngredients({
         page,
         pageSize: PAGE_SIZE,
     });
 
-    const { data: dataAll } = useIngredients({
-        page: 0,
-        pageSize: 1000,
-    });
+    // Usamos los items de la página actual para que las cards no exploten.
+    const pageItems = data?.items ?? [];
 
-    const totalAllergenic = dataAll?.data.filter((i) => i.es_alergeno).length ?? 0;
-    const totalNonAllergenic = dataAll?.data.filter((i) => !i.es_alergeno).length ?? 0;
+    const totalAllergenic = pageItems.filter((i) => i.es_alergeno).length;
+    const totalNonAllergenic = pageItems.filter((i) => !i.es_alergeno).length;
 
     const cardsItems = [
         {
@@ -87,18 +86,18 @@ export default function IngredientsPage() {
         {
             Icon: GoStack,
             title: String(totalAllergenic),
-            description: "Alergénicos",
+            description: "Alergénicos (en esta pág)",
             iconColor: "bg-red-200",
         },
         {
             Icon: GoStack,
             title: String(totalNonAllergenic),
-            description: "No alergénicos",
+            description: "No alergénicos (en esta pág)",
             iconColor: "bg-green-200",
         },
         {
             Icon: GoStack,
-            title: String(data?.data.length ?? 0),
+            title: String(pageItems.length),
             description: "En esta página",
             iconColor: "bg-gray-200",
         },

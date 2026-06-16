@@ -1,19 +1,10 @@
 import type { ProductsPublic } from "./products.types";
 import type { UserPublicAdminPanel } from "./user.types";
+import type { PaginatedResponse } from "./pagination.types";
 
 export interface CategoriaCreatePayload {
     nombre: string;
     descripcion?: string;
-}
-
-export interface GetProductsResponse {
-    data: ProductsPublic[];
-    total: number;
-}
-
-export interface GetUsersResponse {
-    data: UserPublicAdminPanel[];
-    total: number;
 }
 
 export interface CategoriaUpdatePayload {
@@ -21,7 +12,8 @@ export interface CategoriaUpdatePayload {
     descripcion?: string;
 }
 
-export interface ApiListResponseMultiple<T> {
-    data: T[];
-    total: number;
-}
+export type GetProductsResponse = PaginatedResponse<ProductsPublic>;
+
+export type GetUsersResponse = PaginatedResponse<UserPublicAdminPanel>;
+
+export type ApiListResponseMultiple<T> = PaginatedResponse<T>;

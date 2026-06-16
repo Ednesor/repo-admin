@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from "./pagination.types";
+
 export interface IngredientsPublic {
     id: number;
     nombre: string;
@@ -27,7 +29,4 @@ export interface UpdateIngredientInput {
     descripcion?: string;
 }
 
-export interface GetIngredientsResponse {
-    data: IngredientsPublic[];
-    total: number;
-}
+export type GetIngredientsResponse = PaginatedResponse<IngredientsPublic>;
