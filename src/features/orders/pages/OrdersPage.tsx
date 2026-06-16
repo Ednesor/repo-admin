@@ -1,4 +1,5 @@
 import { useOrders } from "../hooks/useOrders";
+import { useOrdersSocket } from "../hooks/useOrdersSocket";
 import { PedidoCard } from "../components/PedidoCard/PedidoCard";
 import type { EstadoPedido, Pedido } from "../types";
 
@@ -12,6 +13,8 @@ const COLUMNAS: { estado: EstadoPedido; titulo: string; colorDot: string }[] = [
 ];
 
 export function OrdersPage() {
+    useOrdersSocket();
+
     const { data, isLoading, isError, cambiarEstadoPedido, isChangingState } = useOrders();
     const pedidos = data?.data ?? [];
 
