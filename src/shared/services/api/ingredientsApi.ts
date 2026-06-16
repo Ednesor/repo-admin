@@ -10,18 +10,16 @@ import apiClient from "./axiosInstance";
 const INGREDIENTES = "/api/v1/ingredientes/";
 
 export async function getIngredients(): Promise<IngredientsPublic[]> {
-    //TODO : BUG GRAVE - Esta función no envía parámetros de paginación. El backend tiene `limit=20` por defecto, por lo que solo se obtienen los primeros 20 ingredientes. Cualquier filtro o select que asuma tener TODOS los ingredientes está roto.
-    const response = await apiClient.get<{ data: IngredientsPublic[] }>(
-        INGREDIENTES,
-    );
+    const response = await apiClient.get<{ data: IngredientsPublic[] }>(`${INGREDIENTES}?limit=1000`);
     return response.data.data;
 }
 
 export async function getIngredientsList(
     offset?: number,
     limit?: number,
+    estado?: string,
+    is_alergeno?: boolean,
 ): Promise<GetIngredientsResponse> {
-    //TODO : Deuda técnica - El backend acepta filtros por "estado" e "is_alergeno". El frontend no envía ninguno de los dos a pesar de ser útiles para las tablas.
     const params = new URLSearchParams();
 
     if (offset !== undefined) {
@@ -30,7 +28,12 @@ export async function getIngredientsList(
     if (limit !== undefined) {
         params.append("limit", String(limit));
     }
-
+    if (estado !== undefined) {
+        params.append("estado", estado);
+    }
+    if (is_alergeno !== undefined) {
+        params.append("is_alergeno", String(is_alergeno));
+    }
     const queryString = params.toString();
     const url = queryString ? `${INGREDIENTES}?${queryString}` : INGREDIENTES;
 
@@ -41,7 +44,6 @@ export async function getIngredientsList(
 export async function getIngredientById(
     id: number,
 ): Promise<IngredientDetail> {
-    //TODO : Deuda técnica - Falta mapear el parámetro "?incluir_eliminado=true" que permite ver un ingrediente aunque haya sufrido soft-delete.
     const response = await apiClient.get<IngredientDetail>(
         `${INGREDIENTES}${id}/`,
     );

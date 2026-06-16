@@ -97,12 +97,6 @@ export default function CategoryModal({
         onClose();
     };
 
-    const getParentName = (parentId: number | null): string => {
-        if (parentId === null) return "Categoría principal";
-        const found = categoriesTree?.data.find((c: CategoriaPublic) => c.id === parentId);
-        return found ? found.nombre : "Categoría principal";
-    };
-
     const flattenCategories = (cats: CategoriaPublic[], depth = 0): { id: number; nombre: string; depth: number }[] => {
         const result: { id: number; nombre: string; depth: number }[] = [];
         for (const cat of cats) {
@@ -112,6 +106,14 @@ export default function CategoryModal({
             }
         }
         return result;
+    };
+
+    const getParentName = (parentId: number | null): string => {
+        if (parentId === null) return "Categoría principal";
+        if (!categoriesTree?.data) return "Categoría principal";
+        const allCats = flattenCategories(categoriesTree.data);
+        const found = allCats.find((c) => c.id === parentId);
+        return found ? found.nombre : "Categoría principal";
     };
 
     if (!isOpen) return null;
@@ -213,7 +215,6 @@ export default function CategoryModal({
                                             onClick={() => setParentOpen((prev) => !prev)}
                                             className="w-full h-11 px-4 rounded-xl border border-gray-200 bg-white flex items-center justify-between text-sm text-gray-700 hover:border-gray-300 transition-colors"
                                         >
-                                            {/* TODO: Al elegir subcategoría se guarda bien el ID, pero al cerrar el selector se muestra erróneamente como si se hubiera elegido la categoría principal. Ajustar getParentName() o el estado para que se vea el nombre correcto. */}
                                             <span>{getParentName(form.parent_id)}</span>
                                             <svg
                                                 className={`w-4 h-4 transition-transform ${parentOpen ? "rotate-180" : ""}`}

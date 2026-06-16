@@ -69,15 +69,13 @@ export function ProductsPage() {
         setColumnFilters,
     } = useProductsTable();
 
-    const { data, isLoading, isError, isFetching, create, update, remove } = useProducts({
+    const { data, isLoading, isError, isFetching, createProduct, updateProduct, deleteProduct } = useProducts({
         page,
         pageSize: PAGE_SIZE,
         categoryIds: selectedCategories,
         ingredientIds: selectedIngredients,
     });
 
-    //TODO : Deuda técnica - Hacer 3 peticiones HTTP paralelas (`data`, `dataAvailable`, `dataUnavailable`) solo para obtener los totales de las tarjetas de estadísticas es extremadamente ineficiente. Cada petición dispara una query con JOINs en el backend. Debería existir un endpoint único `/productos/stats` que devuelva todos los contadores en una sola respuesta.
-    //TODO : Deuda técnica - El parámetro "avaliable" tiene un typo (debería ser "available"). Además, se mapea a `include_only_active` en `productsApi.ts`, pero el backend espera `disponible`.
     const {
         data: dataAvailable,
         isLoading: isLoadingAvailable,
@@ -85,7 +83,7 @@ export function ProductsPage() {
     } = useProducts({
         page,
         pageSize: PAGE_SIZE,
-        avaliable: true,
+        disponible: true,
     });
 
     const {
@@ -95,7 +93,7 @@ export function ProductsPage() {
     } = useProducts({
         page,
         pageSize: PAGE_SIZE,
-        avaliable: false,
+        disponible: false,
     });
 
     const cardsItems = [
@@ -113,16 +111,8 @@ export function ProductsPage() {
         },
         {
             Icon: GoStack,
-            //TODO : BUG GRAVE - El valor de "Sin stock" está hardcodeado a "1" en lugar de calcularse dinámicamente. Esto muestra información falsa al administrador.
-            title: "1",
-            description: "Sin stock",
-            iconColor: "bg-red-200",
-        },
-        {
-            Icon: GoStack,
             title: String(dataUnavailable?.total ?? 0),
-            //TODO : Deuda técnica - Typo en "Deshabilitaods" (debería ser "Deshabilitados").
-            description: "Deshabilitaods",
+            description: "Deshabilitados",
             iconColor: "bg-gray-200",
         },
     ];
@@ -179,7 +169,7 @@ export function ProductsPage() {
             <ProductModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={(formData) => create(formData)}
+                onSubmit={(formData) => createProduct(formData)}
                 mode="create"
             />
             <ProductModal
@@ -187,7 +177,7 @@ export function ProductsPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingProductId !== null) {
-                        await update({
+                        await updateProduct({
                             id: editingProductId,
                             data: formData,
                         });
@@ -201,7 +191,7 @@ export function ProductsPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingProductId !== null) {
-                        await remove(deletingProductId);
+                        await deleteProduct(deletingProductId);
                     }
                 }}
                 productName={deletingProductName}

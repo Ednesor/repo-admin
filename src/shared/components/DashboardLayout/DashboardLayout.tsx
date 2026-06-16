@@ -7,7 +7,7 @@ import { MdOutlineListAlt, MdSoupKitchen, MdSpaceDashboard } from "react-icons/m
 import { ImStack } from "react-icons/im";
 import { TbBottle } from "react-icons/tb";
 import { BiCategoryAlt } from "react-icons/bi";
-import { LuUsers } from "react-icons/lu";
+
 import { FaRegQuestionCircle } from "react-icons/fa";
 import NavBarAdmin from "./NavBarAdmin";
 import NavBarUp from "./NavBarUp";
@@ -22,12 +22,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { path: "/inicio", label: "Inicio", icon: <MdSpaceDashboard />, allowedRoles: ["ADMIN", "STOCK", "PEDIDOS", "COCINA"] },
+    { path: "/panel", label: "Panel", icon: <MdOutlineDashboard />, allowedRoles: ["ADMIN"] },
     { path: "/pedidos", label: "Pedidos", icon: <MdOutlineListAlt />, allowedRoles: ["ADMIN", "PEDIDOS"] },
     { path: "/cocina", label: "Cocina", icon: <MdSoupKitchen />, allowedRoles: ["ADMIN", "COCINA"] },
     { path: "/productos", label: "Productos", icon: <ImStack />, allowedRoles: ["ADMIN", "STOCK"] },
-    { path: "/ingredientes", label: "Ingredientes", icon: <TbBottle />, allowedRoles: ["ADMIN"] },
-    { path: "/categorias", label: "Categorías", icon: <BiCategoryAlt />, allowedRoles: ["ADMIN"] },
-    { path: "/clientes", label: "Clientes", icon: <LuUsers />, allowedRoles: ["ADMIN"] },
+    { path: "/ingredientes", label: "Ingredientes", icon: <TbBottle />, allowedRoles: ["ADMIN", "STOCK"] },
+    { path: "/categorias", label: "Categorías", icon: <BiCategoryAlt />, allowedRoles: ["ADMIN", "STOCK"] },
     { path: "/usuarios", label: "Usuarios", icon: <RiAdminLine />, allowedRoles: ["ADMIN"] },
 ];
 const systemNavItems = [
@@ -43,8 +43,10 @@ const mockBranches: Branch[] = [
 
 
 export function DashboardLayout() {
-    const { user, roles } = useAuthStore();
-    console.log(roles)
+    const { user, roles, hasAnyRole } = useAuthStore();
+        
+     // Filtramos los items según los roles del usuario logueado
+    const filteredNavItems = navItems.filter(item => hasAnyRole(item.roles as RoleCode[]));
 
     const visibleNavItems = useMemo(
         () => {
@@ -63,7 +65,7 @@ export function DashboardLayout() {
                 user={user}
                 roles={roles}
                 systemNavItems={systemNavItems}
-                navItems={visibleNavItems}
+                navItems={filteredNavItems}
             />
 
             <div className="flex-1 flex flex-col bg-[#fafaf7]">
