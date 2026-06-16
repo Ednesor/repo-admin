@@ -1,9 +1,9 @@
-import { useMemo, type ReactNode } from "react";
+import {type ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { RoleCode } from "@/types/user.types";
 import type { Branch } from "./types";
-import { MdOutlineListAlt, MdSoupKitchen, MdSpaceDashboard } from "react-icons/md";
+import { MdOutlineDashboard, MdOutlineListAlt, MdSoupKitchen, MdSpaceDashboard } from "react-icons/md";
 import { ImStack } from "react-icons/im";
 import { TbBottle } from "react-icons/tb";
 import { BiCategoryAlt } from "react-icons/bi";
@@ -46,17 +46,7 @@ export function DashboardLayout() {
     const { user, roles, hasAnyRole } = useAuthStore();
         
      // Filtramos los items según los roles del usuario logueado
-    const filteredNavItems = navItems.filter(item => hasAnyRole(item.roles as RoleCode[]));
-
-    const visibleNavItems = useMemo(
-        () => {
-            const roleCodes = roles.map((r) => r.codigo);
-            return navItems.filter((item) =>
-                item.allowedRoles.some((role) => roleCodes.includes(role)),
-            );
-        },
-        [roles],
-    );
+    const filteredNavItems = navItems.filter(item => hasAnyRole(item.allowedRoles as RoleCode[]));
 
     return (
         <div className="min-h-screen flex">
