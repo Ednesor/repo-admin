@@ -1,7 +1,11 @@
+// TODO: Cloudinary - Integración de ImageUploader y uploadImage para subir la imagen de la categoría.
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiLoader } from "react-icons/fi";
 import { useCategories } from "@/features/categories/hooks/useCategories";
 import type { CreateCategoryInput, CategoriaPublic } from "@/types/categoria.types";
+import ImageUploader from "@/features/products/components/ImageUploader";
+import ImageCard from "@/features/products/components/ImageCard";
+import { uploadImage } from "@/features/products/services/imageService";
 
 interface Props {
     isOpen: boolean;
@@ -16,6 +20,7 @@ const defaultForm: CreateCategoryInput = {
     nombre: "",
     descripcion: "",
     imagen_url: "",
+    imagen_public_id: null,
 };
 
 export default function CategoryModal({
@@ -26,7 +31,8 @@ export default function CategoryModal({
     categoryId,
 }: Props) {
     const [form, setForm] = useState<CreateCategoryInput>(defaultForm);
-    const [newImageUrl, setNewImageUrl] = useState("");
+    // TODO: Cloudinary - Imagen elegida pero AÚN no subida (la categoría tiene UNA sola). El upload se difiere al submit para no dejar huérfanos en Cloudinary si se cancela.
+    const [pendingImage, setPendingImage] = useState<{ file: File; url: string } | null>(null);
     const [parentOpen, setParentOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -40,6 +46,13 @@ export default function CategoryModal({
 
     const { treeData: categoriesTree } = useCategories();
 
+    // TODO: Cloudinary - Revoca el blob URL (createObjectURL) al cambiar/desmontar para evitar memory leaks.
+    useEffect(() => {
+        return () => {
+            if (pendingImage) URL.revokeObjectURL(pendingImage.url);
+        };
+    }, [pendingImage]);
+
     useEffect(() => {
         if (mode === "edit" && categoryData && categoryData.id !== lastLoadedCategoryId.current) {
             lastLoadedCategoryId.current = categoryData.id;
@@ -48,9 +61,29 @@ export default function CategoryModal({
                 nombre: categoryData.nombre,
                 descripcion: categoryData.descripcion ?? "",
                 imagen_url: categoryData.imagen_url ?? "",
+                imagen_public_id: categoryData.imagen_public_id ?? null,
             });
         }
     }, [mode, categoryData]);
+
+    // TODO: Cloudinary - Elige una imagen para previsualizar (sin subir). Revoca el blob anterior si lo había y limpia imagen_url porque la nueva la reemplaza al guardar.
+    const handleFileSelect = (file: File) => {
+        if (pendingImage) URL.revokeObjectURL(pendingImage.url);
+        const url = URL.createObjectURL(file);
+        setPendingImage({ file, url });
+        setForm((prev) => ({ ...prev, imagen_url: "" })); // Clear uploaded url because it will be replaced
+    };
+
+    // TODO: Cloudinary - Quita la imagen YA subida: limpia url y public_id para que el backend la elimine de Cloudinary al guardar.
+    const handleRemoveImage = () => {
+        setForm((prev) => ({ ...prev, imagen_url: "", imagen_public_id: null }));
+    };
+
+    // TODO: Cloudinary - Descarta la imagen pendiente y revoca su blob URL.
+    const handleRemovePendingImage = () => {
+        if (pendingImage) URL.revokeObjectURL(pendingImage.url);
+        setPendingImage(null);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,19 +92,26 @@ export default function CategoryModal({
 
         const missing: string[] = [];
         if (!form.nombre.trim()) missing.push("Nombre");
+        // TODO: Cloudinary - La imagen ahora es obligatoria: vale si ya hay una subida (imagen_url) o una pendiente por subir.
+        if (!form.imagen_url && !pendingImage) missing.push("Imagen");
 
         if (missing.length > 0) {
             setMissingFields(missing);
             return;
         }
 
-        if (newImageUrl.trim()) {
-            setForm((prev) => ({ ...prev, imagen_url: newImageUrl.trim() }));
-        }
-
         setIsSubmitting(true);
         try {
-            await onSubmit(form);
+            let dataToSubmit = { ...form };
+
+            // TODO: Cloudinary - Recién acá se sube la pendiente a Cloudinary (vía backend) y se guardan url + public_id antes de persistir la categoría.
+            if (pendingImage) {
+                const result = await uploadImage(pendingImage.file, "categoria");
+                dataToSubmit.imagen_url = result.imagen_url;
+                dataToSubmit.imagen_public_id = result.imagen_public_id;
+            }
+
+            await onSubmit(dataToSubmit);
             resetForm();
             onClose();
         } catch (err: unknown) {
@@ -86,7 +126,8 @@ export default function CategoryModal({
 
     const resetForm = () => {
         setForm(defaultForm);
-        setNewImageUrl("");
+        if (pendingImage) URL.revokeObjectURL(pendingImage.url);
+        setPendingImage(null);
         setError(null);
         setMissingFields([]);
         lastLoadedCategoryId.current = null;
@@ -288,39 +329,35 @@ export default function CategoryModal({
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        URL de imagen
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Imagen de la categoría *
                                     </label>
-                                    <div className="flex gap-2 mb-2">
-                                        <input
-                                            type="url"
-                                            value={newImageUrl}
-                                            onChange={(e) => setNewImageUrl(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                    e.preventDefault();
-                                                    if (newImageUrl.trim()) {
-                                                        setForm((prev) => ({ ...prev, imagen_url: newImageUrl.trim() }));
-                                                        setNewImageUrl("");
-                                                    }
-                                                }
-                                            }}
-                                            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                            placeholder="https://example.com/image.jpg"
-                                        />
-                                    </div>
-                                    {form.imagen_url && (
-                                        <div className="mt-2">
-                                            <img
-                                                src={form.imagen_url}
-                                                alt="Preview"
-                                                className="w-24 h-24 object-cover rounded-xl"
-                                                onError={(e) => {
-                                                    (e.target as HTMLImageElement).style.display = 'none';
-                                                }}
-                                            />
+                                    
+                                    {!form.imagen_url && !pendingImage && (
+                                        <div className="mb-4">
+                                            <ImageUploader onFileSelect={handleFileSelect} />
                                         </div>
                                     )}
+
+                                    <div className="w-48">
+                                        {form.imagen_url && !pendingImage && (
+                                            <ImageCard
+                                                url={form.imagen_url}
+                                                onRemove={handleRemoveImage}
+                                            />
+                                        )}
+                                        {pendingImage && (
+                                            <div className="relative">
+                                                <ImageCard
+                                                    url={pendingImage.url}
+                                                    onRemove={handleRemovePendingImage}
+                                                />
+                                                <div className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-wider">
+                                                    Pendiente
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </form>

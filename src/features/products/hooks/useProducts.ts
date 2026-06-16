@@ -58,16 +58,20 @@ export function useProducts({
     // 4. Update (PUT/PATCH)
     const updateProduct = useMutation({
         mutationFn: ({ id, data }: { id: number, data: UpdateProductInput }) => apiUpdateProduct(id, data),
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
+            // Invalida también el detalle (["product", id]), no sólo el listado, para que la página de detalle refleje el cambio al instante tras editar desde su modal.
+            queryClient.invalidateQueries({ queryKey: ["product", variables.id] });
         },
     });
 
     // 5. Delete (DELETE)
     const deleteProduct = useMutation({
         mutationFn: (id: number) => apiDeleteProduct(id),
-        onSuccess: () => {
+        onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ["products"] });
+            // Invalida también el detalle ["product", id] para que su cache no quede colgada tras borrar.
+            queryClient.invalidateQueries({ queryKey: ["product", id] });
         },
     });
 

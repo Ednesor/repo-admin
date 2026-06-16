@@ -54,7 +54,7 @@ export async function updateProduct(
     id: number,
     data: UpdateProductInput,
 ): Promise<ProductsPublic> {
-    const response = await apiClient.patch(`${PRODUCTOS}${id}/`, data);
+    const response = await apiClient.patch(`${PRODUCTOS}${id}`, data);
     return response.data;
 }
 
@@ -64,5 +64,6 @@ export async function toggleProductAvailability(id: number): Promise<ProductsPub
 }
 
 export async function deleteProduct(id: number): Promise<void> {
-    await apiClient.delete(`/productos/${id}/`);
+    // Rutas sin barra final (`${id}` en vez de `${id}/`) para coincidir con el backend; antes acá la URL estaba hardcodeada como "/productos/${id}/".
+    await apiClient.delete(`${PRODUCTOS}${id}`);
 }
