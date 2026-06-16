@@ -18,7 +18,7 @@ export function LoginPage() {
 
         try {
             await login({ username, password });
-            navigate("/panel");
+            navigate("/inicio");
         } catch {
             // Error handled by mutation
         }

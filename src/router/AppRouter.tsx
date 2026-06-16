@@ -4,6 +4,7 @@ import CategoriesPage from "@/features/categories/pages/CategoriesPage";
 import CategoryDetailPage from "@/features/categories/pages/CategoryDetailPage";
 
 import HelpPages from "@/features/help/pages/HelpPages";
+import { HomePage } from "@/features/home/pages/HomePage";
 import IngredientsPage from "@/features/ingredients/pages/IngredientsPage";
 import IngredientDetailPage from "@/features/ingredients/pages/IngredientDetailPage";
 import { ProductsPage } from "@/features/products/pages/ProductsPage";
@@ -11,6 +12,7 @@ import { ProductDetailPage } from "@/features/products/pages/ProductDetailPage";
 import { DashboardLayout } from "@/shared/components/DashboardLayout/DashboardLayout";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { OrdersPage } from "@/features/orders/pages/OrdersPage";
+import { KitchenPage } from "@/features/kitchen/pages/KitchenPage";
 import { UsersPage } from "@/features/users";
 import PanelPage from "@/features/panel/pages/PanelPage";
 
@@ -21,6 +23,16 @@ export default function AppRouter() {
                 <Route index element={<LoginPage />} />
 
                 <Route element={<DashboardLayout />}>
+                    <Route
+                        element={
+                            <ProtectedRoute
+                                allowedRoles={["ADMIN", "STOCK", "PEDIDOS", "COCINA"]}
+                            />
+                        }
+                    >
+                        <Route path="/inicio" element={<HomePage />} />
+                    </Route>
+
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
                         <Route path="/panel" element={<PanelPage />} />
                     </Route>
@@ -31,6 +43,10 @@ export default function AppRouter() {
 
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN", "PEDIDOS"]} />}>
                         <Route path="/pedidos" element={<OrdersPage />} />
+                    </Route>
+
+                    <Route element={<ProtectedRoute allowedRoles={["ADMIN", "COCINA"]} />}>
+                        <Route path="/cocina" element={<KitchenPage />} />
                     </Route>
 
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
@@ -47,7 +63,7 @@ export default function AppRouter() {
                     </Route>
 
                     <Route path="/ayuda" element={<HelpPages />} />
-                    <Route path="*" element={<Navigate to="/panel" replace />} />
+                    <Route path="*" element={<Navigate to="/inicio" replace />} />
                 </Route>
             </Routes>
         </BrowserRouter>

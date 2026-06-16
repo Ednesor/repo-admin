@@ -33,7 +33,7 @@ export function useAuth({ enabled = true }: Props = {}) {
             await loginAction(credentials.username, credentials.password);
         },
         onSuccess: () => {
-            navigate("/panel");
+            navigate("/inicio");
         },
         onError: (error: Error) => {
             setError(error.message || "Credenciales inválidas");

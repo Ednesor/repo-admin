@@ -1,8 +1,9 @@
+import { useMemo, type ReactNode } from "react";
 import { Outlet } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { RoleCode } from "@/types/user.types";
 import type { Branch } from "./types";
-import { MdOutlineDashboard, MdOutlineListAlt } from "react-icons/md";
+import { MdOutlineListAlt, MdSoupKitchen, MdSpaceDashboard } from "react-icons/md";
 import { ImStack } from "react-icons/im";
 import { TbBottle } from "react-icons/tb";
 import { BiCategoryAlt } from "react-icons/bi";
@@ -12,14 +13,22 @@ import NavBarAdmin from "./NavBarAdmin";
 import NavBarUp from "./NavBarUp";
 import { RiAdminLine } from "react-icons/ri";
 
-const navItems = [
-    { path: "/panel", label: "Panel", icon: <MdOutlineDashboard />, roles: ["ADMIN"] },
-    { path: "/pedidos", label: "Pedidos", icon: <MdOutlineListAlt />, roles: ["ADMIN", "PEDIDOS", "COCINA"] },
-    { path: "/productos", label: "Productos", icon: <ImStack />, roles: ["ADMIN", "STOCK"] },
-    { path: "/ingredientes", label: "Ingredientes", icon: <TbBottle />, roles: ["ADMIN", "STOCK"] },
-    { path: "/categorias", label: "Categorías", icon: <BiCategoryAlt />, roles: ["ADMIN", "STOCK"] },
+interface NavItem {
+    path: string;
+    label: string;
+    icon: ReactNode;
+    allowedRoles: RoleCode[];
+}
 
-    { path: "/usuarios", label: "Usuarios", icon: <RiAdminLine />, roles: ["ADMIN"] },
+const navItems: NavItem[] = [
+    { path: "/inicio", label: "Inicio", icon: <MdSpaceDashboard />, allowedRoles: ["ADMIN", "STOCK", "PEDIDOS", "COCINA"] },
+    { path: "/panel", label: "Panel", icon: <MdOutlineDashboard />, allowedRoles: ["ADMIN"] },
+    { path: "/pedidos", label: "Pedidos", icon: <MdOutlineListAlt />, allowedRoles: ["ADMIN", "PEDIDOS"] },
+    { path: "/cocina", label: "Cocina", icon: <MdSoupKitchen />, allowedRoles: ["ADMIN", "COCINA"] },
+    { path: "/productos", label: "Productos", icon: <ImStack />, allowedRoles: ["ADMIN", "STOCK"] },
+    { path: "/ingredientes", label: "Ingredientes", icon: <TbBottle />, allowedRoles: ["ADMIN", "STOCK"] },
+    { path: "/categorias", label: "Categorías", icon: <BiCategoryAlt />, allowedRoles: ["ADMIN", "STOCK"] },
+    { path: "/usuarios", label: "Usuarios", icon: <RiAdminLine />, allowedRoles: ["ADMIN"] },
 ];
 const systemNavItems = [
     { path: "/ayuda", label: "Ayuda", icon: <FaRegQuestionCircle /> },
@@ -35,9 +44,19 @@ const mockBranches: Branch[] = [
 
 export function DashboardLayout() {
     const { user, roles, hasAnyRole } = useAuthStore();
-    
-    // Filtramos los items según los roles del usuario logueado
+        
+     // Filtramos los items según los roles del usuario logueado
     const filteredNavItems = navItems.filter(item => hasAnyRole(item.roles as RoleCode[]));
+
+    const visibleNavItems = useMemo(
+        () => {
+            const roleCodes = roles.map((r) => r.codigo);
+            return navItems.filter((item) =>
+                item.allowedRoles.some((role) => roleCodes.includes(role)),
+            );
+        },
+        [roles],
+    );
 
     return (
         <div className="min-h-screen flex">
