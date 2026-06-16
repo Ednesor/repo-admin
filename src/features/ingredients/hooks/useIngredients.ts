@@ -1,84 +1,95 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getIngredientsList, getIngredientById, createIngredient, updateIngredient, deleteIngredient } from "@/shared/services/api/ingredientsApi";
+import { getIngredientsList, getIngredientById, createIngredient as apiCreateIngredient, updateIngredient as apiUpdateIngredient, deleteIngredient as apiDeleteIngredient } from "@/shared/services/api/ingredientsApi";
 import type { CreateIngredientInput, UpdateIngredientInput } from "@/types/ingredients.types";
 
 interface Props {
-    page: number;
-    pageSize: number;
-}
-
-export interface UseIngredientOptions {
-    id: number;
+    page?: number;
+    pageSize?: number;
+    id?: number;
+    fetchAll?: boolean;
     enabled?: boolean;
 }
 
-export function useIngredients({ page, pageSize }: Props) {
-    return useQuery({
+export function useIngredients({
+    page = 0,
+    pageSize = 100,
+    id,
+    fetchAll = false,
+    enabled = true,
+}: Props = {}) {
+    const queryClient = useQueryClient();
+
+    // --- QUERIES (GET) ---
+    // 1. Listar ingredientes (Paginados)
+    const getIngredientsAll = useQuery({
         queryKey: ["ingredients", page, pageSize],
         queryFn: () => getIngredientsList(page * pageSize, pageSize),
         staleTime: 0,
         refetchOnWindowFocus: true,
         placeholderData: (previousData) => previousData,
+        enabled: enabled && !id && !fetchAll, // Se apaga si se pide un ID especifico o se piden TODOS
     });
-}
 
-export function useIngredientsAll() {
-    return useQuery({
-        queryKey: ["ingredients"],
+    // 2. Listar TODOS los ingredientes
+    const getIngredientsFullList = useQuery({
+        queryKey: ["ingredients", "all"],
         queryFn: () => getIngredientsList(),
         staleTime: 0,
         refetchOnWindowFocus: true,
+        enabled: enabled && fetchAll,
     });
-}
 
-export function useIngredient({ id, enabled = true }: UseIngredientOptions) {
-    return useQuery({
+    // 3. Obtener ingrediente por ID
+    const ingredientById = useQuery({
         queryKey: ["ingredient", id],
-        queryFn: () => getIngredientById(id),
-        enabled,
+        queryFn: () => id ? getIngredientById(id) : Promise.reject("No ID provided"),
+        enabled: enabled && !!id, // Solo se ejecuta si el salvavidas esta activo y hay ID
     });
-}
 
-// Create Ingredient
-export function useCreateIngredient() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (data: CreateIngredientInput) => createIngredient(data),
+    // --- MUTATIONS (POST/PUT/DELETE) ---
+    // 4. Crear ingrediente
+    const createIngredient = useMutation({
+        mutationFn: (data: CreateIngredientInput) => apiCreateIngredient(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ingredients"] });
         },
     });
-}
 
-// Update Ingredient
-export function useUpdateIngredient() {
-    const queryClient = useQueryClient();
+    // 5. Actualizar ingrediente
+    const updateIngredient = useMutation({
+        mutationFn: ({ id, data }: { id: number; data: UpdateIngredientInput }) =>
+            apiUpdateIngredient(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["ingredients"] });
+            queryClient.invalidateQueries({ queryKey: ["ingredient"] }); // Invalida el individual tambien
+        },
+    });
 
-    return useMutation({
-        mutationFn: ({
-            id,
-            data,
-        }: {
-            id: number;
-            data: UpdateIngredientInput;
-        }) => updateIngredient(id, data),
+    // 6. Eliminar ingrediente
+    const deleteIngredient = useMutation({
+        mutationFn: (id: number) => apiDeleteIngredient(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["ingredients"] });
         },
     });
+
+    return {
+        // Datos
+        data: getIngredientsAll.data,
+        allData: getIngredientsFullList.data,
+        singleData: ingredientById.data,
+
+        // Carga y recarga
+        isLoading: getIngredientsAll.isLoading || ingredientById.isLoading || getIngredientsFullList.isLoading,
+        isFetching: getIngredientsAll.isFetching || ingredientById.isFetching || getIngredientsFullList.isFetching,
+        isError: getIngredientsAll.isError || ingredientById.isError || getIngredientsFullList.isError,
+        refetch: getIngredientsAll.refetch,
+        refetchById: ingredientById.refetch,
+        refetchAll: getIngredientsFullList.refetch,
+
+        // Acciones
+        createIngredient: createIngredient.mutateAsync,
+        updateIngredient: updateIngredient.mutateAsync,
+        deleteIngredient: deleteIngredient.mutateAsync,
+    };
 }
-
-// Delete Ingredient
-export function useDeleteIngredient() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (id: number) => deleteIngredient(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["ingredients"] });
-        },
-    });
-}
-
-

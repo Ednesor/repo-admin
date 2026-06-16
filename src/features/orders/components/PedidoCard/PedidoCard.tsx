@@ -12,9 +12,9 @@ interface Props {
 export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
     const [isCancelling, setIsCancelling] = useState(false);
     const [motivo, setMotivo] = useState("");
+    const [error, setError] = useState("");
 
     const handleAvanzar = () => {
-        //TODO : Deuda técnica - Las transiciones de estados están hardcodeadas en el frontend y duplican `TRANSICIONES_VALIDAS` del backend. Si el backend cambia sus reglas (ej: agrega nuevo estado "LISTO_PARA_RETIRAR"), el frontend no lo sabrá y las flechas de avanzar/retroceder quedarán desincronizadas. Idealmente el backend debería exponer un endpoint que devuelva las transiciones válidas para cada estado.
         let siguienteEstado: EstadoPedido = 'CONFIRMADO';
         if (pedido.estado_codigo === 'PENDIENTE') siguienteEstado = 'CONFIRMADO';
         if (pedido.estado_codigo === 'CONFIRMADO') siguienteEstado = 'EN_PREP';
@@ -28,15 +28,14 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
         let anteriorEstado: EstadoPedido = 'PENDIENTE';
         if (pedido.estado_codigo === 'CONFIRMADO') anteriorEstado = 'PENDIENTE';
         if (pedido.estado_codigo === 'EN_PREP') anteriorEstado = 'CONFIRMADO';
-        if (pedido.estado_codigo === 'EN_CAMINO') anteriorEstado = 'EN_PREP';
 
         onAvanzar(pedido.id, anteriorEstado);
     };
 
     const confirmCancelar = () => {
+        setError("");
         if (motivo.trim().length === 0) {
-            //TODO : Deuda técnica - Usar `alert()` nativo para mostrar errores de validación es una mala práctica de UX. Debe usarse un componente de toast/notificación o un mensaje inline en el modal.
-            alert("El motivo es obligatorio para cancelar.");
+            setError("El motivo es obligatorio para cancelar.");
             return;
         }
         onAvanzar(pedido.id, 'CANCELADO', motivo);
@@ -47,6 +46,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
     const cancelCancelar = () => {
         setIsCancelling(false);
         setMotivo("");
+        setError("");
     };
 
 
@@ -107,7 +107,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
 
                 {!isTerminado && (
                     <div className="flex gap-2">
-                        {pedido.estado_codigo !== 'PENDIENTE' && (
+                        {pedido.estado_codigo !== 'PENDIENTE' && pedido.estado_codigo !== 'EN_CAMINO' && (
                             <button
                                 onClick={handleRetroceder}
                                 disabled={isLoading}
@@ -150,6 +150,11 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
                     <p className="text-gray-600 mb-4">
                         Por favor, indicá el motivo de la cancelación.
                     </p>
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                            {error}
+                        </div>
+                    )}
                     <textarea
                         value={motivo}
                         onChange={(e) => setMotivo(e.target.value)}

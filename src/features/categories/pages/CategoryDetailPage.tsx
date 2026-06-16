@@ -1,7 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2 } from "react-icons/fi";
-import { useCategory } from "../hooks/useCategories";
+import { useCategories } from "../hooks/useCategories";
 import { useAuthStore } from "@/store/useAuthStore";
+import type { CategoriaPublic } from "@/types/categoria.types";
 
 export default function CategoryDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -11,7 +12,7 @@ export default function CategoryDetailPage() {
     );
 
     const categoryId = id ? parseInt(id, 10) : 0;
-    const { data: category, isLoading, isError } = useCategory({
+    const { singleData: category, isLoading, isError } = useCategories({
         id: categoryId,
         enabled: !isNaN(categoryId),
     });
@@ -155,7 +156,7 @@ export default function CategoryDetailPage() {
                                 Subcategorías
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {category.subcategorias.map((sub) => (
+                                {category.subcategorias.map((sub: CategoriaPublic) => (
                                     <span
                                         key={sub.id}
                                         className="bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full text-sm font-medium"
@@ -173,7 +174,7 @@ export default function CategoryDetailPage() {
                                 Productos en esta categoría
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                                {category.productos.map((prod) => (
+                                {category.productos.map((prod: { id: number; nombre: string }) => (
                                     <span
                                         key={prod.id}
                                         className="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm font-medium"

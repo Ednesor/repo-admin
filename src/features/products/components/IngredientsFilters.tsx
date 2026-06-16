@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FiChevronDown } from "react-icons/fi";
-import { useIngredients } from "../hooks/useIngredients";
+import { useIngredients } from "@/features/ingredients/hooks/useIngredients";
 import type { IngredientsPublic } from "@/types/ingredients.types";
 
 interface Props {
@@ -15,7 +15,7 @@ export default function IngredientsFilters({
 }: Props) {
     const [open, setOpen] = useState(false);
 
-    const { data } = useIngredients();
+    const { allData: data } = useIngredients({ fetchAll: true });
 
     const toggleIngredient = (id: number) => {
         if (selectedIngredients.includes(id)) {
@@ -62,7 +62,7 @@ export default function IngredientsFilters({
                         Todos los ingredientes
                     </button>
 
-                    {data?.map((ingredient: IngredientsPublic) => (
+                    {data?.data?.map((ingredient: IngredientsPublic) => (
                         <button
                             key={ingredient.id}
                             onClick={() => toggleIngredient(ingredient.id)}

@@ -11,7 +11,7 @@ interface Props {
     user?: UserPublicAdminPanel | null;
 }
 
-const ROLES: RoleCode[] = ["ADMIN", "STOCK", "PEDIDOS"];
+const ROLES: RoleCode[] = ["ADMIN", "STOCK", "PEDIDOS", "COCINA"];
 
 const defaultCreateForm: CreateUserInput = {
     nombre: "",

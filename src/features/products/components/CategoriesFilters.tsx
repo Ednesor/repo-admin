@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FiChevronDown } from "react-icons/fi";
 
-import { useCategoriesTree } from "../../categories/hooks/useCategories";
+import { useCategories } from "../../categories/hooks/useCategories";
 import type { CategoriaPublic } from "@/types/categoria.types";
 
 interface Props {
@@ -16,7 +16,7 @@ export default function ProductsFilters({
 }: Props) {
     const [open, setOpen] = useState(false);
 
-    const { data } = useCategoriesTree();
+    const { treeData: categories } = useCategories();
 
     const toggleCategory = (id: number) => {
         if (selectedCategories.includes(id)) {
@@ -63,7 +63,7 @@ export default function ProductsFilters({
                         Todas las categorías
                     </button>
 
-                    {data?.data.map((category: CategoriaPublic) => (
+                    {categories?.data?.map((category: CategoriaPublic) => (
                         <div key={category.id} className="mb-3">
                             {/* CATEGORY */}
                             <button
@@ -100,7 +100,7 @@ export default function ProductsFilters({
                             </button>
 
                             {/* SUBCATEGORIES */}
-                            {category.subcategorias?.length > 0 && (
+                            {category.subcategorias && category.subcategorias.length > 0 && (
                                 <div className="ml-6 mt-1 flex flex-col gap-1">
                                     {category.subcategorias.map(
                                         (subcategory: CategoriaPublic) => (

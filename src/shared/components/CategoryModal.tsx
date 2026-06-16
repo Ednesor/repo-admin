@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiLoader } from "react-icons/fi";
-import { useCategory } from "@/features/categories/hooks/useCategories";
-import { useCategoriesTree } from "@/features/categories/hooks/useCategories";
+import { useCategories } from "@/features/categories/hooks/useCategories";
 import type { CreateCategoryInput, CategoriaPublic } from "@/types/categoria.types";
 
 interface Props {
@@ -34,12 +33,12 @@ export default function CategoryModal({
     const [missingFields, setMissingFields] = useState<string[]>([]);
     const lastLoadedCategoryId = useRef<number | null>(null);
 
-    const { data: categoryData, isLoading: isLoadingCategory } = useCategory({
+    const { singleData: categoryData, isLoading: isLoadingCategory } = useCategories({
         id: categoryId ?? 0,
         enabled: isOpen && mode === "edit" && categoryId !== undefined,
     });
 
-    const { data: categoriesTree } = useCategoriesTree();
+    const { treeData: categoriesTree } = useCategories();
 
     useEffect(() => {
         if (mode === "edit" && categoryData && categoryData.id !== lastLoadedCategoryId.current) {
@@ -98,12 +97,6 @@ export default function CategoryModal({
         onClose();
     };
 
-    const getParentName = (parentId: number | null): string => {
-        if (parentId === null) return "Categoría principal";
-        const found = categoriesTree?.data.find((c) => c.id === parentId);
-        return found ? found.nombre : "Categoría principal";
-    };
-
     const flattenCategories = (cats: CategoriaPublic[], depth = 0): { id: number; nombre: string; depth: number }[] => {
         const result: { id: number; nombre: string; depth: number }[] = [];
         for (const cat of cats) {
@@ -113,6 +106,14 @@ export default function CategoryModal({
             }
         }
         return result;
+    };
+
+    const getParentName = (parentId: number | null): string => {
+        if (parentId === null) return "Categoría principal";
+        if (!categoriesTree?.data) return "Categoría principal";
+        const allCats = flattenCategories(categoriesTree.data);
+        const found = allCats.find((c) => c.id === parentId);
+        return found ? found.nombre : "Categoría principal";
     };
 
     if (!isOpen) return null;

@@ -28,6 +28,8 @@ interface Props {
     onViewDetails?: (ingredientId: number) => void;
 }
 
+const columnHelper = createColumnHelper<IngredientsPublic>();
+
 export default function TableIngredients({
     sorting,
     columnFilters,
@@ -42,8 +44,6 @@ export default function TableIngredients({
     onDeleteIngredient,
     onViewDetails,
 }: Props) {
-    const columnHelper = createColumnHelper<IngredientsPublic>();
-
     const columns = useMemo(
         () => [
             columnHelper.accessor("nombre", {
@@ -91,7 +91,7 @@ export default function TableIngredients({
                 ),
             }),
         ],
-        [],
+        [onEditIngredient, onViewDetails, onDeleteIngredient],
     );
 
     const table = useReactTable({

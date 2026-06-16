@@ -9,7 +9,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CategoryModal from "@/shared/components/CategoryModal";
 import DeleteCategoryModal from "@/shared/components/DeleteCategoryModal";
-import { useCreateCategory, useUpdateCategory, useDeleteCategory } from "../hooks/useCategories";
 
 const PAGE_SIZE = 10;
 
@@ -24,10 +23,6 @@ export default function CategoriesPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null);
     const [deletingCategoryName, setDeletingCategoryName] = useState<string>("");
-
-    const createCategoryMutation = useCreateCategory();
-    const updateCategoryMutation = useUpdateCategory();
-    const deleteCategoryMutation = useDeleteCategory();
 
     const handleEditCategory = (categoryId: number) => {
         setEditingCategoryId(categoryId);
@@ -64,7 +59,7 @@ export default function CategoriesPage() {
         setColumnFilters,
     } = useCategoriesTable();
 
-    const { data, isLoading, isError, isFetching } = useCategories({
+    const { data, isLoading, isError, isFetching, createCategory, updateCategory, deleteCategory } = useCategories({
         page,
         pageSize: PAGE_SIZE,
     });
@@ -120,7 +115,7 @@ export default function CategoriesPage() {
                         {totalPages}
                     </p>
                 </div>
-                {role !== "Admin" && (
+                {role === "Admin" && (
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
@@ -148,9 +143,7 @@ export default function CategoriesPage() {
             <CategoryModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={(formData) =>
-                    createCategoryMutation.mutateAsync(formData)
-                }
+                onSubmit={(formData) => createCategory(formData)}
                 mode="create"
             />
             <CategoryModal
@@ -158,7 +151,7 @@ export default function CategoriesPage() {
                 onClose={handleCloseEditModal}
                 onSubmit={async (formData) => {
                     if (editingCategoryId !== null) {
-                        await updateCategoryMutation.mutateAsync({
+                        await updateCategory({
                             id: editingCategoryId,
                             data: formData,
                         });
@@ -172,7 +165,7 @@ export default function CategoriesPage() {
                 onClose={handleCloseDeleteModal}
                 onConfirm={async () => {
                     if (deletingCategoryId !== null) {
-                        await deleteCategoryMutation.mutateAsync(deletingCategoryId);
+                        await deleteCategory(deletingCategoryId);
                     }
                 }}
                 categoryName={deletingCategoryName}

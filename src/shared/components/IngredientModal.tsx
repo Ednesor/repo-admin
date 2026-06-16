@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiLoader } from "react-icons/fi";
-import { useIngredient } from "@/features/ingredients/hooks/useIngredients";
+import { useIngredients } from "@/features/ingredients/hooks/useIngredients";
 import type { CreateIngredientInput } from "@/types/ingredients.types";
 
 interface Props {
@@ -30,7 +30,7 @@ export default function IngredientModal({
     const [missingFields, setMissingFields] = useState<string[]>([]);
     const lastLoadedIngredientId = useRef<number | null>(null);
 
-    const { data: ingredientData, isLoading: isLoadingIngredient } = useIngredient({
+    const { singleData: ingredientData, isLoading: isLoadingIngredient } = useIngredients({
         id: ingredientId ?? 0,
         enabled: isOpen && mode === "edit" && ingredientId !== undefined,
     });

@@ -8,5 +8,5 @@ export { default as UserModal } from "./components/UserModal";
 export { default as DeleteUserModal } from "./components/DeleteUserModal";
 export { default as UserDetailModal } from "./components/UserDetailModal";
 
-export { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from "./hooks/useUsers";
+export { useUsers } from "./hooks/useUsers";
 export { useUsersTable } from "./hooks/useUsersTable";

@@ -29,6 +29,8 @@ interface Props {
     onViewDetails?: (productId: number) => void;
 }
 
+const columnHelper = createColumnHelper<ProductsPublic>();
+
 export default function TableProducts({
     sorting,
     columnFilters,
@@ -43,8 +45,6 @@ export default function TableProducts({
     onDeleteProduct,
     onViewDetails,
 }: Props) {
-    const columnHelper = createColumnHelper<ProductsPublic>();
-
     const columns = useMemo(
         () => [
             columnHelper.accessor("imagenes_url", {
@@ -166,7 +166,7 @@ export default function TableProducts({
                 ),
             }),
         ],
-        [],
+        [onEditProduct, onViewDetails, onDeleteProduct],
     );
 
     const table = useReactTable({

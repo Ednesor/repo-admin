@@ -3,31 +3,46 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { LoginCredentials } from "@/shared/services/api/authApi";
 
-export function useLogin() {
-    const navigate = useNavigate();
-    const login = useAuthStore((state) => state.login);
-    const setError = useAuthStore((state) => state.setError);
+interface Props {
+    enabled?: boolean;
+}
 
-    return useMutation({
+export function useAuth({ enabled = true }: Props = {}) {
+    const navigate = useNavigate();
+    
+    // Zustand State (Global)
+    const loginAction = useAuthStore((state) => state.login);
+    const logoutAction = useAuthStore((state) => state.logout);
+    const setError = useAuthStore((state) => state.setError);
+    const checkAuth = useAuthStore((state) => state.checkAuth);
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const isLoadingInitial = useAuthStore((state) => state.isLoadingInitial);
+
+    // --- QUERIES (GET) ---
+    const currentUserQuery = useQuery({
+        queryKey: ["currentUser"],
+        queryFn: checkAuth,
+        retry: false,
+        staleTime: 5 * 60 * 1000,
+        enabled, // El salvavidas para evitar chequear sesión si no hace falta
+    });
+
+    // --- MUTATIONS (POST/PUT/DELETE) ---
+    const loginMutation = useMutation({
         mutationFn: async (credentials: LoginCredentials) => {
-            await login(credentials.username, credentials.password);
+            await loginAction(credentials.username, credentials.password);
         },
         onSuccess: () => {
-            navigate("/panel");
+            navigate("/inicio");
         },
         onError: (error: Error) => {
             setError(error.message || "Credenciales inválidas");
         },
     });
-}
 
-export function useLogout() {
-    const navigate = useNavigate();
-    const logout = useAuthStore((state) => state.logout);
-
-    return useMutation({
+    const logoutMutation = useMutation({
         mutationFn: async () => {
-            await logout();
+            await logoutAction();
         },
         onSuccess: () => {
             navigate("/");
@@ -36,25 +51,24 @@ export function useLogout() {
             navigate("/");
         },
     });
-}
-
-export function useCurrentUser() {
-    const checkAuth = useAuthStore((state) => state.checkAuth);
-
-    return useQuery({
-        queryKey: ["currentUser"],
-        queryFn: checkAuth,
-        retry: false,
-        staleTime: 5 * 60 * 1000,
-    });
-}
-
-export function useRequireAuth() {
-    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const isLoadingInitial = useAuthStore((state) => state.isLoadingInitial);
 
     return {
+        // Datos y estado de sesión
+        data: currentUserQuery.data,
         isAuthenticated,
-        isLoading: isLoadingInitial,
+        
+        // Carga y errores combinando React Query + Zustand
+        isLoading: currentUserQuery.isLoading || isLoadingInitial,
+        isError: currentUserQuery.isError,
+        isFetching: currentUserQuery.isFetching,
+        
+        // Acciones
+        refetch: currentUserQuery.refetch,
+        login: loginMutation.mutateAsync,
+        logout: logoutMutation.mutateAsync,
+        
+        // Mutaciones state
+        isLoggingIn: loginMutation.isPending,
+        loginError: loginMutation.error,
     };
 }

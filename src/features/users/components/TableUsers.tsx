@@ -34,6 +34,8 @@ function getFullName(user: UserPublicAdminPanel): string {
     return `${user.nombre} ${user.apellido}`.trim();
 }
 
+const columnHelper = createColumnHelper<UserPublicAdminPanel>();
+
 export default function TableUsers({
     sorting,
     columnFilters,
@@ -48,8 +50,6 @@ export default function TableUsers({
     onDeleteUser,
     onViewDetails,
 }: Props) {
-    const columnHelper = createColumnHelper<UserPublicAdminPanel>();
-
     const columns = useMemo(
         () => [
             columnHelper.accessor("id", {
@@ -129,7 +129,7 @@ export default function TableUsers({
                 ),
             }),
         ],
-        [],
+        [onEditUser, onViewDetails, onDeleteUser],
     );
 
     const table = useReactTable({

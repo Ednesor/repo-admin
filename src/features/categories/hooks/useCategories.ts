@@ -1,90 +1,81 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getCategories, getCategoriesTree, getCategoryById, createCategory, updateCategory, deleteCategory } from "@/shared/services/api/categoriesApi";
+import { getCategories, getCategoriesTree, getCategoryById, createCategory as apiCreateCategory, updateCategory as apiUpdateCategory, deleteCategory as apiDeleteCategory } from "@/shared/services/api/categoriesApi";
 import type { CreateCategoryInput, UpdateCategoryInput } from "@/types/categoria.types";
 
 interface Props {
-    page: number;
-    pageSize: number;
-}
-
-export interface UseCategoryOptions {
-    id: number;
+    id?: number;
+    page?: number;
+    pageSize?: number;
     enabled?: boolean;
 }
 
-export function useCategories({ page, pageSize }: Props) {
-    return useQuery({
+export function useCategories({ id, page = 0, pageSize = 100, enabled = true }: Props = {}) {
+    const queryClient = useQueryClient();
+
+    // --- QUERIES (GET) ---
+    // 1. Get All (Lista paginada)
+    const getCategoriesAll = useQuery({
         queryKey: ["categories", page, pageSize],
         queryFn: () => getCategories(page * pageSize, pageSize),
-        staleTime: 0,
-        refetchOnWindowFocus: true,
-        placeholderData: (previousData) => previousData,
+        enabled: enabled && !id,
     });
-}
 
-export function useCategoriesTree() {
-    return useQuery({
+    // 2. Get Tree
+    const categoriesTree = useQuery({
         queryKey: ["categories-tree"],
         queryFn: getCategoriesTree,
-        staleTime: 0,
-        refetchOnWindowFocus: true,
+        enabled: enabled && !id,
     });
-}
 
-export function useCategory({ id, enabled = true }: UseCategoryOptions) {
-    return useQuery({
+    // 3. Get By ID (Una sola categoría)
+    const categoryById = useQuery({
         queryKey: ["category", id],
-        queryFn: () => getCategoryById(id),
-        enabled,
+        queryFn: () => id ? getCategoryById(id) : Promise.reject("No ID provided"),
+        enabled: enabled && !!id,
     });
-}
 
-
-// Create Category
-export function useCreateCategory() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (data: CreateCategoryInput) => createCategory(data),
+    // --- MUTATIONS (POST, PUT, DELETE) ---
+    const createCategory = useMutation({
+        mutationFn: (data: CreateCategoryInput) => apiCreateCategory(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             queryClient.invalidateQueries({ queryKey: ["categories-tree"] });
         },
     });
-}
 
-// Update category
+    const updateCategory = useMutation({
+        mutationFn: ({ id, data }: { id: number, data: UpdateCategoryInput }) => apiUpdateCategory(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["categories"] });
+            queryClient.invalidateQueries({ queryKey: ["categories-tree"] });
+            queryClient.invalidateQueries({ queryKey: ["category"] });
+        },
+    });
 
-export function useUpdateCategory() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: ({
-            id,
-            data,
-        }: {
-            id: number;
-            data: UpdateCategoryInput;
-        }) => updateCategory(id, data),
+    const deleteCategory = useMutation({
+        mutationFn: (id: number) => apiDeleteCategory(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["categories"] });
             queryClient.invalidateQueries({ queryKey: ["categories-tree"] });
         },
     });
+
+    return {
+        // Datos
+        data: getCategoriesAll.data,
+        treeData: categoriesTree.data,
+        singleData: categoryById.data,
+        
+        // Estados de carga y error
+        isLoading: getCategoriesAll.isLoading || categoriesTree.isLoading || categoryById.isLoading,
+        isFetching: getCategoriesAll.isFetching || categoriesTree.isFetching || categoryById.isFetching,
+        isError: getCategoriesAll.isError || categoriesTree.isError || categoryById.isError,
+        refetch: getCategoriesAll.refetch,
+        refetchById: categoryById.refetch,
+        
+        // Acciones
+        createCategory: createCategory.mutateAsync,
+        updateCategory: updateCategory.mutateAsync,
+        deleteCategory: deleteCategory.mutateAsync,
+    };
 }
-
-// Delete category
-
-export function useDeleteCategory() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (id: number) => deleteCategory(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["categories"] });
-            queryClient.invalidateQueries({ queryKey: ["categories-tree"] });
-        },
-    });
-}
-
-
