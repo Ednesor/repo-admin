@@ -14,7 +14,7 @@ const PAGE_SIZE = 10;
 
 export default function CategoriesPage() {
     const role = useAuthStore((state) =>
-        state.hasRole("ADMIN") ? "Admin" : "User",
+        state.hasRole("admin") ? "Admin" : "User",
     );
     const navigate = useNavigate();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

@@ -3,7 +3,7 @@ import SucursalSelect from "./SucursalSelect";
 import type { Branch } from "./types";
 import { NavLink } from "react-router-dom";
 import { BsLayoutSidebarInsetReverse } from "react-icons/bs";
-import type { UserPublic, RolPublic } from "@/types/user.types";
+import type { RolPublic, UserPublic } from "@/types/user.types";
 import { useState } from "react";
 import { ROLE_LABELS } from "@/types/user.types";
 
