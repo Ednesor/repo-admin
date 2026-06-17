@@ -13,9 +13,8 @@ import DeleteCategoryModal from "@/shared/components/DeleteCategoryModal";
 const PAGE_SIZE = 10;
 
 export default function CategoriesPage() {
-    const role = useAuthStore((state) =>
-        state.hasRole("admin") ? "Admin" : "User",
-    );
+    // Permisos por capability en vez de comparar el rol como string ("Admin"). El botón "Crear" se gatea con canManageCategories().
+    const canManageCategories = useAuthStore((state) => state.canManageCategories);
     const navigate = useNavigate();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -115,7 +114,7 @@ export default function CategoriesPage() {
                         {totalPages}
                     </p>
                 </div>
-                {role === "Admin" && (
+                {canManageCategories() && (
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
                         className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
