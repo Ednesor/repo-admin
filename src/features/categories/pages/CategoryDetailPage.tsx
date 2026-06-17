@@ -1,21 +1,24 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2 } from "react-icons/fi";
+import { useState } from "react";
 import { useCategories } from "../hooks/useCategories";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { CategoriaPublic } from "@/types/categoria.types";
+import CategoryModal from "@/shared/components/CategoryModal";
 
 export default function CategoryDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const role = useAuthStore((state) =>
-        state.hasRole("admin") ? "Admin" : "User",
-    );
+    // FIX (intencional): antes el botón "Editar" se mostraba con `role !== "Admin"`, lógica invertida que lo exponía a NO-admins y se lo ocultaba al admin. Se corrige gateando con la capability canManageCategories() (reemplaza el `hasRole("admin") ? "Admin" : "User"` viejo).
+    const canManageCategories = useAuthStore((state) => state.canManageCategories);
 
     const categoryId = id ? parseInt(id, 10) : 0;
-    const { singleData: category, isLoading, isError } = useCategories({
+    const { singleData: category, isLoading, isError, updateCategory } = useCategories({
         id: categoryId,
         enabled: !isNaN(categoryId),
     });
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     if (isLoading) {
         return (
@@ -61,9 +64,10 @@ export default function CategoryDetailPage() {
                     <FiArrowLeft size={20} />
                     <span>Volver a categorías</span>
                 </button>
-                {role !== "Admin" && (
+                {canManageCategories() && (
                     <button
-                        onClick={() => navigate(`/categorias/${category.id}/editar`)}
+                        // Editar abre el modal en la misma página en vez de navegar a /categorias/:id/editar como antes.
+                        onClick={() => setIsEditModalOpen(true)}
                         className="flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
                     >
                         <FiEdit2 size={16} />
@@ -187,6 +191,16 @@ export default function CategoryDetailPage() {
                     )}
                 </div>
             </div>
+
+            <CategoryModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSubmit={async (formData) => {
+                    await updateCategory({ id: categoryId, data: formData });
+                }}
+                mode="edit"
+                categoryId={categoryId}
+            />
         </div>
     );
 }
