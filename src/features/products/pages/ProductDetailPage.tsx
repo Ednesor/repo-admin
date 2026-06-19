@@ -1,20 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2, FiCheck, FiX } from "react-icons/fi";
+import { useState } from "react";
 import { useProducts } from "../hooks/useProducts";
 import { useAuthStore } from "@/store/useAuthStore";
+import ProductModal from "@/shared/components/ProductModal";
 
 export function ProductDetailPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const role = useAuthStore((state) =>
-        state.hasRole("ADMIN") ? "Admin" : "User",
-    );
+    // FIX (intencional): antes el botón "Editar" se mostraba con `role !== "Admin"`, lógica invertida que lo exponía a NO-admins y se lo ocultaba al admin. Se corrige gateando con la capability canEditProducts() (reemplaza el `hasRole("ADMIN") ? "Admin" : "User"` viejo).
+    const canEditProducts = useAuthStore((state) => state.canEditProducts);
 
     const productId = id ? parseInt(id, 10) : 0;
-    const { singleData: product, isLoading, isError } = useProducts({
+    const { singleData: product, isLoading, isError, updateProduct } = useProducts({
         id: productId,
         enabled: !isNaN(productId),
     });
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     if (isLoading) {
         return (
@@ -60,9 +63,10 @@ export function ProductDetailPage() {
                     <FiArrowLeft size={20} />
                     <span>Volver a productos</span>
                 </button>
-                {role !== "Admin" && (
+                {canEditProducts() && (
                     <button
-                        onClick={() => navigate(`/productos/${product.id}/editar`)}
+                        // Editar abre el modal en la misma página (setIsEditModalOpen) en vez de navegar a una ruta /editar como antes.
+                        onClick={() => setIsEditModalOpen(true)}
                         className="flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
                     >
                         <FiEdit2 size={16} />
@@ -194,6 +198,16 @@ export function ProductDetailPage() {
                     )}
                 </div>
             </div>
+
+            <ProductModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSubmit={async (formData) => {
+                    await updateProduct({ id: productId, data: formData });
+                }}
+                mode="edit"
+                productId={productId}
+            />
         </div>
     );
 }
