@@ -1,3 +1,4 @@
+// TODO: Cloudinary - Integración de ImageUploader y uploadImage para subir imágenes del producto.
 import { useState, useEffect, useRef } from "react";
 import { FiX, FiPlus, FiTrash2, FiLoader } from "react-icons/fi";
 import { useCategories } from "@/features/categories/hooks/useCategories";
@@ -7,6 +8,9 @@ import { useAuthStore } from "@/store/useAuthStore";
 import type { CategoriaPublic } from "@/types/categoria.types";
 import type { IngredientsPublic } from "@/types/ingredients.types";
 import type { CreateProductInput } from "@/types/products.types";
+import ImageUploader from "@/features/products/components/ImageUploader";
+import ImageCard from "@/features/products/components/ImageCard";
+import { uploadImage } from "@/features/products/services/imageService";
 
 interface Props {
     isOpen: boolean;
@@ -21,6 +25,7 @@ const defaultForm: CreateProductInput = {
     descripcion: "",
     precio_base: 0,
     imagenes_url: [],
+    imagenes_public_id: [],
     stock_cantidad: 0,
     disponible: true,
     categoria_ids: [],
@@ -35,13 +40,21 @@ export default function ProductModal({
     productId,
 }: Props) {
     const [form, setForm] = useState<CreateProductInput>(defaultForm);
-    const [newImageUrl, setNewImageUrl] = useState("");
     const [categoriesOpen, setCategoriesOpen] = useState(false);
     const [ingredientsOpen, setIngredientsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [missingFields, setMissingFields] = useState<string[]>([]);
+    // TODO: Cloudinary - Imágenes elegidas pero AÚN no subidas. El upload se difiere hasta el submit para no dejar archivos huérfanos en Cloudinary si el usuario cancela. `url` es un blob local (createObjectURL) sólo para previsualizar.
+    const [pendingImages, setPendingImages] = useState<{ file: File; url: string }[]>([]);
     const lastLoadedProductId = useRef<number | null>(null);
+
+    // TODO: Cloudinary - URL.createObjectURL reserva memoria del navegador que no se libera sola; este cleanup revoca los blobs al cambiar/desmontar para evitar memory leaks.
+    useEffect(() => {
+        return () => {
+            pendingImages.forEach((img) => URL.revokeObjectURL(img.url));
+        };
+    }, [pendingImages]);
 
     const { treeData: categoriesData } = useCategories();
     const { allData: ingredientsData } = useIngredients({ fetchAll: true });
@@ -67,6 +80,7 @@ export default function ProductModal({
                 descripcion: productData.descripcion,
                 precio_base: parseFloat(productData.precio_base) || 0,
                 imagenes_url: productData.imagenes_url ?? [],
+                imagenes_public_id: productData.imagenes_public_id ?? [],
                 stock_cantidad: productData.stock_cantidad,
                 disponible: productData.disponible,
                 categoria_ids: productData.categorias?.map((c) => c.id) ?? [],
@@ -97,21 +111,29 @@ export default function ProductModal({
         });
     };
 
-    const addImageUrl = () => {
-        if (newImageUrl.trim()) {
-            setForm((prev: CreateProductInput) => ({
-                ...prev,
-                imagenes_url: [...(prev.imagenes_url ?? []), newImageUrl.trim()],
-            }));
-            setNewImageUrl("");
-        }
+    // TODO: Cloudinary - No sube nada todavía: sólo guarda el File y un blob URL local para previsualizar. El upload real ocurre en handleSubmit.
+    const handleFileSelect = (file: File) => {
+        const url = URL.createObjectURL(file);
+        setPendingImages((prev) => [...prev, { file, url }]);
     };
 
-    const removeImageUrl = (index: number) => {
-        setForm((prev: CreateProductInput) => ({
+    // TODO: Cloudinary - Quita una imagen YA subida. Filtra imagenes_url e imagenes_public_id por el MISMO índice para mantener ambos arrays alineados (el public_id es lo que el backend usa para borrarla de Cloudinary).
+    const handleRemoveImage = (index: number) => {
+        setForm((prev) => ({
             ...prev,
-            imagenes_url: (prev.imagenes_url ?? []).filter((_, i: number) => i !== index),
+            imagenes_url: (prev.imagenes_url ?? []).filter((_, i) => i !== index),
+            imagenes_public_id: (prev.imagenes_public_id ?? []).filter((_, i) => i !== index),
         }));
+    };
+
+    // TODO: Cloudinary - Quita una imagen PENDIENTE (aún no subida). Revoca su blob URL antes de sacarla del array para liberar memoria.
+    const handleRemovePendingImage = (index: number) => {
+        setPendingImages((prev) => {
+            const newPending = [...prev];
+            URL.revokeObjectURL(newPending[index].url);
+            newPending.splice(index, 1);
+            return newPending;
+        });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -131,13 +153,25 @@ export default function ProductModal({
             return;
         }
 
-        if (newImageUrl.trim()) {
-            addImageUrl();
-        }
-
         setIsSubmitting(true);
         try {
-            let dataToSubmit = form;
+            let dataToSubmit = { ...form };
+
+            // TODO: Cloudinary - Recién acá se suben las pendientes a Cloudinary (vía backend), de forma secuencial. Por cada archivo guardamos su imagen_url + imagen_public_id y los concatenamos a las imágenes ya existentes.
+            if (pendingImages.length > 0) {
+                const uploadedUrls: string[] = [];
+                const uploadedPublicIds: string[] = [];
+                
+                for (const pending of pendingImages) {
+                    const result = await uploadImage(pending.file, "producto");
+                    uploadedUrls.push(result.imagen_url);
+                    uploadedPublicIds.push(result.imagen_public_id);
+                }
+                
+                dataToSubmit.imagenes_url = [...(dataToSubmit.imagenes_url ?? []), ...uploadedUrls];
+                dataToSubmit.imagenes_public_id = [...(dataToSubmit.imagenes_public_id ?? []), ...uploadedPublicIds];
+            }
+
             if (isOnlyStock && mode === "edit") {
                 dataToSubmit = { stock_cantidad: form.stock_cantidad } as CreateProductInput;
             }
@@ -156,9 +190,10 @@ export default function ProductModal({
 
     const resetForm = () => {
         setForm(defaultForm);
-        setNewImageUrl("");
         setError(null);
         setMissingFields([]);
+        pendingImages.forEach((img) => URL.revokeObjectURL(img.url));
+        setPendingImages([]);
         lastLoadedProductId.current = null;
     };
 
@@ -573,60 +608,41 @@ export default function ProductModal({
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        URLs de imágenes
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Imágenes
                                     </label>
-                                    <div className="flex gap-2 mb-2">
-                                        <input
-                                            type="url"
-                                            value={newImageUrl}
-                                            onChange={(e) =>
-                                                setNewImageUrl(e.target.value)
-                                            }
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter") {
-                                                    e.preventDefault();
-                                                    addImageUrl();
-                                                }
-                                            }}
-                                            disabled={isOnlyStock}
-                                            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
-                                            placeholder="https://example.com/image.jpg"
+                                    
+                                    <div className="mb-4">
+                                        <ImageUploader 
+                                            onFileSelect={handleFileSelect} 
+                                            disabled={isOnlyStock} 
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={addImageUrl}
-                                            disabled={isOnlyStock}
-                                            className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <FiPlus className="w-5 h-5 text-gray-600" />
-                                        </button>
                                     </div>
 
-                                    {(form.imagenes_url ?? []).length > 0 && (
-                                        <div className="space-y-2">
+                                    {((form.imagenes_url ?? []).length > 0 || pendingImages.length > 0) && (
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
                                             {(form.imagenes_url ?? []).map(
                                                 (url: string, index: number) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2"
-                                                    >
-                                                        <span className="flex-1 text-sm text-gray-600 truncate">
-                                                            {url}
-                                                        </span>
-                                                        <button
-                                                            type="button"
-                                                            disabled={isOnlyStock}
-                                                            onClick={() =>
-                                                                removeImageUrl(index)
-                                                            }
-                                                            className="p-1 hover:bg-gray-200 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        >
-                                                            <FiTrash2 className="w-4 h-4 text-red-500" />
-                                                        </button>
-                                                    </div>
+                                                    <ImageCard
+                                                        key={`uploaded-${index}`}
+                                                        url={url}
+                                                        onRemove={() => handleRemoveImage(index)}
+                                                        disabled={isOnlyStock}
+                                                    />
                                                 ),
                                             )}
+                                            {pendingImages.map((img, index) => (
+                                                <div key={`pending-${index}`} className="relative">
+                                                    <ImageCard
+                                                        url={img.url}
+                                                        onRemove={() => handleRemovePendingImage(index)}
+                                                        disabled={isOnlyStock}
+                                                    />
+                                                    <div className="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm uppercase tracking-wider">
+                                                        Pendiente
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
