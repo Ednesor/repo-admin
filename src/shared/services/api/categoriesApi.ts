@@ -51,7 +51,7 @@ export async function getCategoryById(
     id: number,
 ): Promise<CategoriaDetail> {
     const response = await apiClient.get<CategoriaDetail>(
-        `${CATEGORIAS}${id}/`,
+        `${CATEGORIAS}${id}`,
     );
     return response.data;
 }
@@ -67,10 +67,11 @@ export async function updateCategory(
     id: number,
     data: UpdateCategoryInput,
 ): Promise<CategoriaDetail> {
-    const response = await apiClient.patch(`${CATEGORIAS}${id}/`, data);
+    const response = await apiClient.patch(`${CATEGORIAS}${id}`, data);
     return response.data;
 }
 
 export async function deleteCategory(id: number): Promise<void> {
-    await apiClient.delete(`${CATEGORIAS}${id}/`);
+    // Rutas sin barra final (`${id}` en vez de `${id}/`) en get/update/delete para coincidir con el backend.
+    await apiClient.delete(`${CATEGORIAS}${id}`);
 }
