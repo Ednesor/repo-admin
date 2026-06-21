@@ -19,7 +19,6 @@ export function useKitchenSocket() {
             socket.on<Pedido>("NUEVO_PEDIDO", invalidate),
             socket.on<Pedido>("PEDIDO_CONFIRMADO", invalidate),
             socket.on<Pedido>("PEDIDO_EN_PREPARACION", invalidate),
-            socket.on<Pedido>("PEDIDO_EN_CAMINO", invalidate),
             socket.on<Pedido>("PEDIDO_CANCELADO", invalidate),
             socket.on<Pedido>("ESTADO_ACTUALIZADO", invalidate),
         ];

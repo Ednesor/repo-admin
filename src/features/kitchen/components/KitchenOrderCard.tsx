@@ -10,7 +10,7 @@ interface Props {
 export function KitchenOrderCard({ pedido, onAvanzar, isLoading }: Props) {
     const isConfirmed = pedido.estado_codigo === "CONFIRMADO";
     const actionText = isConfirmed ? "Cocinar" : "Despachar";
-    const nextState: EstadoPedido = isConfirmed ? "EN_PREP" : "EN_CAMINO";
+    const nextState: EstadoPedido = isConfirmed ? "EN_PREP" : "ENTREGADO";
 
     const hora = new Date(pedido.created_at).toLocaleTimeString([], {
         hour: "2-digit",
