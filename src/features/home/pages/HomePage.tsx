@@ -2,7 +2,7 @@ import { useMemo, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ROLE_LABELS, type RoleCode } from "@/types/user.types";
-import { MdOutlineListAlt, MdSoupKitchen } from "react-icons/md";
+import { MdOutlineListAlt } from "react-icons/md";
 import { ImStack } from "react-icons/im";
 import { TbBottle } from "react-icons/tb";
 import { BiCategoryAlt } from "react-icons/bi";
@@ -27,14 +27,6 @@ const QUICK_ACTIONS: QuickAction[] = [
         icon: <MdOutlineListAlt />,
         iconColor: "bg-orange-200 text-orange-700",
         roles: ["ADMIN", "PEDIDOS"],
-    },
-    {
-        label: "Cocina",
-        description: "Tablero de pedidos en preparación",
-        path: "/cocina",
-        icon: <MdSoupKitchen />,
-        iconColor: "bg-blue-200 text-blue-700",
-        roles: ["ADMIN", "COCINA"],
     },
     {
         label: "Productos",
