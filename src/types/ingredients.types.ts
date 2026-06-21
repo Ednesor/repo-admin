@@ -28,6 +28,9 @@ export interface UpdateIngredientInput {
 }
 
 export interface GetIngredientsResponse {
-    data: IngredientsPublic[];
+    items: IngredientsPublic[];
     total: number;
+    page: number;
+    size: number;
+    pages: number;
 }

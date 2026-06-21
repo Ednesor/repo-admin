@@ -18,8 +18,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
         let siguienteEstado: EstadoPedido = 'CONFIRMADO';
         if (pedido.estado_codigo === 'PENDIENTE') siguienteEstado = 'CONFIRMADO';
         if (pedido.estado_codigo === 'CONFIRMADO') siguienteEstado = 'EN_PREP';
-        if (pedido.estado_codigo === 'EN_PREP') siguienteEstado = 'EN_CAMINO';
-        if (pedido.estado_codigo === 'EN_CAMINO') siguienteEstado = 'ENTREGADO';
+        if (pedido.estado_codigo === 'EN_PREP') siguienteEstado = 'ENTREGADO';
 
         onAvanzar(pedido.id, siguienteEstado);
     };
@@ -59,7 +58,6 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
         PENDIENTE: 'border-red-500',
         CONFIRMADO: 'border-yellow-500',
         EN_PREP: 'border-blue-500',
-        EN_CAMINO: 'border-indigo-500',
         ENTREGADO: 'border-green-500',
         CANCELADO: 'border-gray-500',
     };
@@ -107,7 +105,7 @@ export function PedidoCard({ pedido, onAvanzar, isLoading }: Props) {
 
                 {!isTerminado && (
                     <div className="flex gap-2">
-                        {pedido.estado_codigo !== 'PENDIENTE' && pedido.estado_codigo !== 'EN_CAMINO' && (
+                        {pedido.estado_codigo !== 'PENDIENTE' && (
                             <button
                                 onClick={handleRetroceder}
                                 disabled={isLoading}

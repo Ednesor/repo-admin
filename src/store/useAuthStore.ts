@@ -28,7 +28,6 @@ interface AuthState {
     canAccessAdmin: () => boolean;
     canManageUsers: () => boolean;
     canManageCategories: () => boolean;
-    isOnlyKitchen: () => boolean;
 }
 
 
@@ -65,7 +64,7 @@ export const useAuthStore = create<AuthState>()(
                     // Validar si el usuario tiene un rol permitido
                     const roleCodes = user.roles.map((r) => r.codigo);
                     const hasAdminRole = roleCodes.some((code) =>
-                        ["ADMIN", "STOCK", "PEDIDOS", "COCINA"].includes(code)
+                        ["ADMIN", "STOCK", "PEDIDOS"].includes(code)
                     );
 
                     if (!hasAdminRole) {
@@ -104,7 +103,7 @@ export const useAuthStore = create<AuthState>()(
                     // obtiene los codigos de los roles
                     const roleCodes = roles.map((r) => r.codigo);
                     const hasAdminRole = roleCodes.some((code) =>
-                        ["ADMIN", "STOCK", "PEDIDOS", "COCINA"].includes(code)
+                        ["ADMIN", "STOCK", "PEDIDOS"].includes(code)
                     );
 
                     // si no tiene rol de administrador, cerrar sesion
@@ -216,16 +215,10 @@ export const useAuthStore = create<AuthState>()(
                 return roleCodes.includes("ADMIN") || roleCodes.includes("STOCK");
             },
 
-            // Lógica de negocio: Comprobar si es solo cocina
-            isOnlyKitchen: () => {
-                const roles = get().roles;
-                return roles.length === 1 && roles.some((r: RolPublic) => r.codigo === "COCINA");
-            },
-
             // Lógica de negocio: Quién puede ver y cambiar estados de pedidos
             canManageOrders: () => {
                 const roles = get().roles;
-                return roles.some((r: RolPublic) => ["ADMIN", "PEDIDOS", "COCINA"].includes(r.codigo));
+                return roles.some((r: RolPublic) => ["ADMIN", "PEDIDOS"].includes(r.codigo));
             },
 
             // Puerta de entrada principal: Quién puede renderizar la vista del Panel
@@ -234,8 +227,7 @@ export const useAuthStore = create<AuthState>()(
                 const roleCodes = roles.map((r: RolPublic) => r.codigo);
                 return roleCodes.includes("ADMIN") ||
                     roleCodes.includes("STOCK") ||
-                    roleCodes.includes("PEDIDOS") ||
-                    roleCodes.includes("COCINA");
+                    roleCodes.includes("PEDIDOS");
             },
         }),
         {

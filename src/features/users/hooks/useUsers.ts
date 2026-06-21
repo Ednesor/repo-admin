@@ -18,8 +18,8 @@ export function useUsers({ page = 0, pageSize = 100, rolCodigo, enabled = true }
         queryKey: ["users", page, pageSize, rolCodigo],
         queryFn: () =>
             getUsers({
-                offset: page * pageSize,
-                limit: pageSize,
+                page: page + 1,
+                size: pageSize,
                 rol_codigo: rolCodigo as CreateUserInput["roles_codigos"][number] | undefined,
             }),
         staleTime: 0,

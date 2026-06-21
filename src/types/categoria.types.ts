@@ -42,10 +42,13 @@ export interface UpdateCategoryInput {
 }
 
 export interface GetCategoriesResponse {
-    data: CategoriaPublic[];
+    items: CategoriaPublic[];
     total: number;
+    page: number;
+    size: number;
+    pages: number;
 }
 
 export interface CategoryTreeResponse {
-    data: CategoriaPublic[];
+    items: CategoriaPublic[];
 }

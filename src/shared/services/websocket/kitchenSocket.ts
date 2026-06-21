@@ -4,7 +4,6 @@ export type KitchenEventType =
     | "NUEVO_PEDIDO"
     | "PEDIDO_CONFIRMADO"
     | "PEDIDO_EN_PREPARACION"
-    | "PEDIDO_EN_CAMINO"
     | "PEDIDO_CANCELADO"
     | "ESTADO_ACTUALIZADO";
 
@@ -118,13 +117,17 @@ export class KitchenSocket {
         };
 
         socket.onerror = () => {
-            // El evento onclose se encarga de la reconexión.
+            // Silenciamos el error para evitar spam en consola.
+            // El onclose se encarga de la reconexión.
         };
 
-        socket.onclose = () => {
+        socket.onclose = (event) => {
             this.socket = null;
             if (!this.isManualClose && this.roomRefCount > 0) {
-                this.reconnectTimer = setTimeout(() => this.connect(), RECONNECT_DELAY_MS);
+                // No reconectar si el servidor cerró activamente (código 1008, 1011, etc.)
+                if (event.code >= 1000 && event.code < 4000) {
+                    this.reconnectTimer = setTimeout(() => this.connect(), RECONNECT_DELAY_MS);
+                }
             }
         };
     }
