@@ -143,7 +143,7 @@ export default function TableCategories({
     );
 
     const table = useReactTable({
-        data: data?.data ?? [],
+        data: data?.items ?? [],
         columns,
         state: {
             sorting,
