@@ -7,8 +7,11 @@ export interface CategoriaCreatePayload {
 }
 
 export interface GetProductsResponse {
-    data: ProductsPublic[];
+    items: ProductsPublic[];
     total: number;
+    page: number;
+    size: number;
+    pages: number;
 }
 
 export interface GetUsersResponse {

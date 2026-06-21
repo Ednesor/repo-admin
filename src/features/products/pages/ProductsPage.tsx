@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import ProductModal from "@/shared/components/ProductModal";
 import DeleteProductModal from "@/shared/components/DeleteProductModal";
 
-const PAGE_SIZE = 10;
+
 
 export function ProductsPage() {
     const canCreate = useAuthStore((state) => state.canCreateProducts);
@@ -71,7 +71,7 @@ export function ProductsPage() {
 
     const { data, isLoading, isError, isFetching, createProduct, updateProduct, deleteProduct } = useProducts({
         page,
-        pageSize: PAGE_SIZE,
+        pageSize: 20,
         categoryIds: selectedCategories,
         ingredientIds: selectedIngredients,
     });
@@ -82,7 +82,7 @@ export function ProductsPage() {
         isError: isErrorAvailable,
     } = useProducts({
         page,
-        pageSize: PAGE_SIZE,
+        pageSize: 20,
         disponible: true,
     });
 
@@ -92,7 +92,7 @@ export function ProductsPage() {
         isError: isErrorUnavailable,
     } = useProducts({
         page,
-        pageSize: PAGE_SIZE,
+        pageSize: 20,
         disponible: false,
     });
 
@@ -124,7 +124,7 @@ export function ProductsPage() {
             <div className="p-6 text-red-600">Error al cargar productos</div>
         );
 
-    const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE);
+    const totalPages = data?.pages ?? 1;
 
     return (
         <div className="p-6">
@@ -132,8 +132,7 @@ export function ProductsPage() {
                 <div>
                     <h1 className="text-2xl font-bold">Productos</h1>
                     <p className="text-gray-500 text-sm">
-                        {data?.total ?? 0} productos · Página {page + 1} de{" "}
-                        {totalPages}
+                        {data?.total ?? 0} productos · Página {data?.page ?? 1} de {data?.pages ?? 1}
                     </p>
                 </div>
                 {canCreate() && (
