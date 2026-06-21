@@ -11,9 +11,14 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-    mensaje: string;
     access_token: string;
     token_type: string;
+    expires_in: number;
+    refresh_token: string;
+}
+
+export interface RefreshTokenRequest {
+    refresh_token: string;
 }
 
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
@@ -28,8 +33,21 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
     return response.data;
 }
 
-export async function logout(): Promise<{ mensaje: string }> {
-    const response = await apiClient.post<{ mensaje: string }>(`${AUTH}/logout`);
+// Solicita una nueva sesión usando el refresh_token persistido.
+// El backend rota tanto el access_token (cookie) como el refresh_token (response body).
+export async function refresh(data: RefreshTokenRequest): Promise<LoginResponse> {
+    const response = await apiClient.post<LoginResponse>(`${AUTH}/refresh`, data, { withCredentials: true });
+    return response.data;
+}
+
+//export async function logout(): Promise<{ mensaje: string }> {
+//    const response = await apiClient.post<{ mensaje: string }>(`${AUTH}/logout`);
+//    return response.data;}
+
+// Logout real:
+// además de limpiar estado local, revoca el refresh_token en backend.
+export async function logout(data: RefreshTokenRequest): Promise<{ mensaje: string }> {
+    const response = await apiClient.post<{ mensaje: string }>(`${AUTH}/logout`, data, { withCredentials: true });
     return response.data;
 }
 

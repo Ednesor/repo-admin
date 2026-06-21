@@ -11,11 +11,18 @@ interface AuthState {
     isLoadingInitial: boolean;
     error: string | null;
 
+    // Se persiste porque el interceptor lo necesita para recuperar la sesión
+    // cuando el backend responde 401 por access_token vencido.
+    refreshToken: string | null;
+
     login: (username: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
     clearSession: () => void;
     setError: (msg: string | null) => void;
+
+    // Permite actualizar el refresh token rotado por el bac
+    setRefreshToken: (token: string | null) => void;
 
     hasRole: (...roles: RoleCode[]) => boolean;
     hasAnyRole: (roles: RoleCode[]) => boolean;
@@ -42,9 +49,15 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false as boolean,
             isLoadingInitial: true as boolean,
             error: null as string | null,
+            refreshToken: null as string | null,
 
             setError: (msg: string | null) => set({ error: msg }),
 
+            setRefreshToken: (token: string | null) => set({ refreshToken: token }),
+
+
+            // Limpiamos también el refreshToken para evitar reintentos con credenciales expiradas
+            // o sesiones inconsistentes después de logout / refresh fallido.
             clearSession: () => {
                 set({
                     user: null,
@@ -52,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
                     isAuthenticated: false,
                     isLoading: false,
                     error: null,
+                    refreshToken: null,
                 });
             },
 
@@ -68,13 +82,25 @@ export const useAuthStore = create<AuthState>()(
                         ["ADMIN", "STOCK", "PEDIDOS", "COCINA"].includes(code)
                     );
 
+                    // Si la sesión existe pero el usuario no tiene rol válido para el panel,
+                    // revocamos el refresh token si está disponible y limpiamos el estado local
                     if (!hasAdminRole) {
-                        try { await authApi.logout(); } catch { /* ignore */ }
+                        const refreshToken = get().refreshToken;
+                        try {
+                            if (refreshToken) {
+                                await authApi.logout({ refresh_token: refreshToken });
+                            }
+                        } catch {
+                            // ignore
+                        }
+                        // Si no pudimos restaurar la sesión desde backend, descartamos también
+                        // el refreshToken persistido para no intentar recuperaciones inválidas después.
                         set({
                             user: null,
                             roles: [],
                             isAuthenticated: false,
                             isLoadingInitial: false,
+                            refreshToken: null,
                         });
                         return;
                     }
@@ -91,6 +117,7 @@ export const useAuthStore = create<AuthState>()(
                         roles: [],
                         isAuthenticated: false,
                         isLoadingInitial: false,
+                        refreshToken: null,
                     });
                 }
             },
@@ -98,7 +125,9 @@ export const useAuthStore = create<AuthState>()(
             login: async (username: string, password: string) => {
                 set({ isLoading: true, error: null });
                 try {
-                    await authApi.login({ username, password });
+                    // El backend devuelve el refresh_token en el body.
+                    // Lo necesitamos para poder renovar la sesión más adelante desde el interceptor
+                    const tokenData = await authApi.login({ username, password });
                     const user = await authApi.getCurrentUser();
                     const roles = user.roles;
                     // obtiene los codigos de los roles
@@ -109,11 +138,8 @@ export const useAuthStore = create<AuthState>()(
 
                     // si no tiene rol de administrador, cerrar sesion
                     if (!hasAdminRole) {
-                        try { await authApi.logout(); } catch { /* ignore */ }
+                        get().clearSession();
                         set({
-                            user: null,
-                            roles: [],
-                            isAuthenticated: false,
                             isLoading: false,
                             error: "No tenés permisos para acceder al panel de administración",
                         });
@@ -126,6 +152,7 @@ export const useAuthStore = create<AuthState>()(
                         roles,
                         isAuthenticated: true,
                         isLoading: false,
+                        refreshToken: tokenData.refresh_token,
                     });
                 } catch (e: unknown) {
                     if ((e as Error).message === "INSUFFICIENT_PERMISSIONS") {
@@ -145,8 +172,12 @@ export const useAuthStore = create<AuthState>()(
             },
 
             logout: async () => {
+                const refreshToken = get().refreshToken;
+
                 try {
-                    await authApi.logout();
+                    if (refreshToken) {
+                        await authApi.logout({ refresh_token: refreshToken });
+                    }
                 } catch {
                     // Even if network fails, clean local state
                 }
@@ -156,6 +187,7 @@ export const useAuthStore = create<AuthState>()(
                     isAuthenticated: false,
                     error: null,
                     isLoading: false,
+                    refreshToken: null,
                 });
             },
 
