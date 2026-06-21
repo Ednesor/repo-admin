@@ -1,4 +1,3 @@
-import type { GetUsersResponse } from "@/types/api.types";
 import type { UserPublicAdminPanel, RoleCode } from "@/types/user.types";
 import { ROLE_LABELS } from "@/types/user.types";
 import {
@@ -18,7 +17,7 @@ import RowActions from "./RowActions";
 interface Props {
     sorting: SortingState;
     columnFilters: ColumnFiltersState;
-    data: GetUsersResponse | undefined;
+    data: UserPublicAdminPanel[];
     isFetching: boolean;
     setSorting: React.Dispatch<React.SetStateAction<SortingState>>;
     setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
@@ -133,7 +132,7 @@ export default function TableUsers({
     );
 
     const table = useReactTable({
-        data: data?.data ?? [],
+        data: data ?? [],
         columns,
         state: {
             sorting,

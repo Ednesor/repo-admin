@@ -54,7 +54,7 @@ export interface UpdateUserInput {
 }
 
 export interface UserFilters {
-    offset?: number;
-    limit?: number;
+    page?: number;
+    size?: number;
     rol_codigo?: RoleCode;
 }

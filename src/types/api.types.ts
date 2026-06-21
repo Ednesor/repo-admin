@@ -15,8 +15,11 @@ export interface GetProductsResponse {
 }
 
 export interface GetUsersResponse {
-    data: UserPublicAdminPanel[];
+    items: UserPublicAdminPanel[];
     total: number;
+    page: number;
+    size: number;
+    pages: number;
 }
 
 export interface CategoriaUpdatePayload {
