@@ -62,7 +62,7 @@ export default function IngredientsFilters({
                         Todos los ingredientes
                     </button>
 
-                    {data?.data?.map((ingredient: IngredientsPublic) => (
+                    {data?.items?.map((ingredient: IngredientsPublic) => (
                         <button
                             key={ingredient.id}
                             onClick={() => toggleIngredient(ingredient.id)}

@@ -15,8 +15,8 @@ export function usePanel({
     // --- QUERIES (GET) ---
     // 1. Get Resumen
     const resumen = useQuery({
-        queryKey: ["resumen"],
-        queryFn: () => getResumen(),
+        queryKey: ["resumen", desde, hasta],
+        queryFn: () => getResumen(desde, hasta),
         enabled: enabled && !!desde && !!hasta,
     });
 
@@ -36,8 +36,8 @@ export function usePanel({
 
     // 4. Get Pedidos Estado
     const pedidosEstado = useQuery({
-        queryKey: ["pedidos-estado"],
-        queryFn: () => getPedidosEstado(),
+        queryKey: ["pedidos-estado", desde, hasta],
+        queryFn: () => getPedidosEstado(desde, hasta),
         enabled: enabled && !!desde && !!hasta,
     });
 
