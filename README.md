@@ -1,7 +1,11 @@
 # Admin App
 
 Sistema de administración desarrollado con React, TypeScript, Vite y Tailwind CSS.
+--
 
+video: https://drive.google.com/file/d/1TN4jfbk-sBAEybgjCK4OUvrTVEcnvxwF/view?usp=sharing
+
+--
 ## Arquitectura
 
 El proyecto sigue una **arquitectura basada en features** (módulos por dominio):
