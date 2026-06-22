@@ -1,4 +1,4 @@
-export type RoleCode = "ADMIN" | "STOCK" | "PEDIDOS" | "CLIENT" | "COCINA";
+export type RoleCode = "ADMIN" | "STOCK" | "PEDIDOS" | "CLIENT";
 
 export interface RolPublic {
     codigo: RoleCode;
@@ -28,7 +28,6 @@ export const ROLE_LABELS: Record<RoleCode, string> = {
     STOCK: "Gestor de Stock",
     PEDIDOS: "Gestor de Pedidos",
     CLIENT: "Cliente",
-    COCINA: "Cocina",
 };
 
 export const ROLE_DESCRIPTIONS: Record<RoleCode, string> = {
@@ -36,7 +35,6 @@ export const ROLE_DESCRIPTIONS: Record<RoleCode, string> = {
     STOCK: "Actualiza stock y disponible",
     PEDIDOS: "Avanza estados CONFIRMADO->ENTREGADO",
     CLIENT: "Opera solo sus propios datos",
-    COCINA: "Prepara los pedidos",
 };
 
 export interface CreateUserInput {
@@ -56,7 +54,7 @@ export interface UpdateUserInput {
 }
 
 export interface UserFilters {
-    offset?: number;
-    limit?: number;
+    page?: number;
+    size?: number;
     rol_codigo?: RoleCode;
 }

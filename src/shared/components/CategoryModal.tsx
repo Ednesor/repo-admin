@@ -102,7 +102,7 @@ export default function CategoryModal({
 
         setIsSubmitting(true);
         try {
-            let dataToSubmit = { ...form };
+            const dataToSubmit = { ...form };
 
             // TODO: Cloudinary - Recién acá se sube la pendiente a Cloudinary (vía backend) y se guardan url + public_id antes de persistir la categoría.
             if (pendingImage) {
@@ -151,8 +151,8 @@ export default function CategoryModal({
 
     const getParentName = (parentId: number | null): string => {
         if (parentId === null) return "Categoría principal";
-        if (!categoriesTree?.data) return "Categoría principal";
-        const allCats = flattenCategories(categoriesTree.data);
+        if (!categoriesTree?.items) return "Categoría principal";
+        const allCats = flattenCategories(categoriesTree.items);
         const found = allCats.find((c) => c.id === parentId);
         return found ? found.nombre : "Categoría principal";
     };
@@ -289,7 +289,7 @@ export default function CategoryModal({
                                                     Categoría principal
                                                 </button>
 
-                                                {flattenCategories(categoriesTree.data).map((cat) => (
+                                                {flattenCategories(categoriesTree.items).map((cat) => (
                                                     <button
                                                         key={cat.id}
                                                         type="button"

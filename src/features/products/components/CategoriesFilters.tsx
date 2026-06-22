@@ -63,7 +63,7 @@ export default function ProductsFilters({
                         Todas las categorías
                     </button>
 
-                    {categories?.data?.map((category: CategoriaPublic) => (
+                    {categories?.items?.map((category: CategoriaPublic) => (
                         <div key={category.id} className="mb-3">
                             {/* CATEGORY */}
                             <button

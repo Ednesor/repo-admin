@@ -85,7 +85,7 @@ export function UsersPage() {
     };
 
     const handleEditUser = (userId: number) => {
-        const user = data?.data.find((u) => u.id === userId) ?? null;
+        const user = data?.items.find((u) => u.id === userId) ?? null;
         setEditingUser(user);
         setIsEditModalOpen(true);
     };
@@ -108,7 +108,7 @@ export function UsersPage() {
     };
 
     const handleViewDetails = (userId: number) => {
-        const user = data?.data.find((u) => u.id === userId) ?? null;
+        const user = data?.items.find((u) => u.id === userId) ?? null;
         setViewingUser(user);
         setIsDetailModalOpen(true);
     };
@@ -127,7 +127,7 @@ export function UsersPage() {
         );
     }
 
-    const totalPages = Math.ceil((data?.total ?? 0) / PAGE_SIZE);
+    const totalPages = data?.pages ?? 1;
 
     return (
         <div className="p-6">
@@ -159,13 +159,13 @@ export function UsersPage() {
             <TableUsers
                 sorting={sorting}
                 columnFilters={columnFilters}
-                data={data}
+                data={data?.items ?? []}
                 isFetching={isFetching}
                 setSorting={setSorting}
                 setColumnFilters={setColumnFilters}
                 setPage={setPage}
                 page={page}
-                totalPages={totalPages}
+                totalPages={data?.pages ?? 1}
                 onEditUser={handleEditUser}
                 onDeleteUser={handleDeleteUser}
                 onViewDetails={handleViewDetails}

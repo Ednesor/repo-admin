@@ -95,7 +95,7 @@ export default function TableIngredients({
     );
 
     const table = useReactTable({
-        data: data?.data ?? [],
+        data: data?.items ?? [],
         columns,
         state: {
             sorting,

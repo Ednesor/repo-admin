@@ -12,7 +12,6 @@ import { ProductDetailPage } from "@/features/products/pages/ProductDetailPage";
 import { DashboardLayout } from "@/shared/components/DashboardLayout/DashboardLayout";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { OrdersPage } from "@/features/orders/pages/OrdersPage";
-import { KitchenPage } from "@/features/kitchen/pages/KitchenPage";
 import { UsersPage } from "@/features/users";
 import PanelPage from "@/features/panel/pages/PanelPage";
 
@@ -26,7 +25,7 @@ export default function AppRouter() {
                     <Route
                         element={
                             <ProtectedRoute
-                                allowedRoles={["ADMIN", "STOCK", "PEDIDOS", "COCINA"]}
+                                allowedRoles={["ADMIN", "STOCK", "PEDIDOS"]}
                             />
                         }
                     >
@@ -43,10 +42,6 @@ export default function AppRouter() {
 
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN", "PEDIDOS"]} />}>
                         <Route path="/pedidos" element={<OrdersPage />} />
-                    </Route>
-
-                    <Route element={<ProtectedRoute allowedRoles={["ADMIN", "COCINA"]} />}>
-                        <Route path="/cocina" element={<KitchenPage />} />
                     </Route>
 
                     <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>

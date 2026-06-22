@@ -3,8 +3,8 @@ import apiClient from "./axiosInstance"
 
 const PANEL = "/api/v1/estadisticas/"
 
-export async function getResumen(): Promise<ResumenResponse> {
-    const response = await apiClient.get(PANEL + "resumen")
+export async function getResumen(desde: string, hasta: string): Promise<ResumenResponse> {
+    const response = await apiClient.get(PANEL + `resumen?desde=${desde}&hasta=${hasta}`)
     return response.data
 }
 
@@ -18,8 +18,8 @@ export async function getProductosTop(desde: string, hasta: string): Promise<Pro
     return response.data
 }
 
-export async function getPedidosEstado(): Promise<PedidosEstadoItem[]> {
-    const response = await apiClient.get(PANEL + "pedidos-por-estado")
+export async function getPedidosEstado(desde: string, hasta: string): Promise<PedidosEstadoItem[]> {
+    const response = await apiClient.get(PANEL + `pedidos-por-estado?desde=${desde}&hasta=${hasta}`)
     return response.data
 }
 

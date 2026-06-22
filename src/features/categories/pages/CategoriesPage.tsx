@@ -68,9 +68,9 @@ export default function CategoriesPage() {
         pageSize: 1000,
     });
 
-    const totalParent = dataAll?.data.filter((c) => c.parent_id === null).length ?? 0;
-    const totalSubcategories = dataAll?.data.filter((c) => c.parent_id !== null).length ?? 0;
-    const totalWithProducts = dataAll?.data.filter((c) => (c.productos?.length ?? 0) > 0).length ?? 0;
+    const totalParent = dataAll?.items?.filter((c) => c.parent_id === null).length ?? 0;
+    const totalSubcategories = dataAll?.items?.filter((c) => c.parent_id !== null).length ?? 0;
+    const totalWithProducts = dataAll?.items?.filter((c) => (c.productos?.length ?? 0) > 0).length ?? 0;
 
     const cardsItems = [
         {

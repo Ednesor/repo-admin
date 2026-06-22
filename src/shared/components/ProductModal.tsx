@@ -1,6 +1,6 @@
 // TODO: Cloudinary - Integración de ImageUploader y uploadImage para subir imágenes del producto.
 import { useState, useEffect, useRef } from "react";
-import { FiX, FiPlus, FiTrash2, FiLoader } from "react-icons/fi";
+import { FiX, FiLoader } from "react-icons/fi";
 import { useCategories } from "@/features/categories/hooks/useCategories";
 import { useIngredients } from "@/features/ingredients/hooks/useIngredients";
 import { useProducts } from "@/features/products/hooks/useProducts";
@@ -419,7 +419,7 @@ export default function ProductModal({
                                                     Todas las categorías
                                                 </button>
 
-                                                {categoriesData?.data.map(
+                                                {categoriesData?.items?.map(
                                                     (category: CategoriaPublic) => (
                                                         <div key={category.id}>
                                                             <button
@@ -562,7 +562,7 @@ export default function ProductModal({
                                                     Todos los ingredientes
                                                 </button>
 
-                                                {ingredientsData?.data?.map(
+                                                {ingredientsData?.items?.map(
                                                     (ingredient: IngredientsPublic) => (
                                                         <button
                                                             key={ingredient.id}
