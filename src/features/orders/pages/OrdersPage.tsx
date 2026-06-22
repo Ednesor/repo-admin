@@ -1,4 +1,5 @@
 import { useOrders } from "../hooks/useOrders";
+import { useOrdersSocket } from "../hooks/useOrdersSocket";
 import { PedidoCard } from "../components/PedidoCard/PedidoCard";
 import type { EstadoPedido, Pedido } from "../types";
 
@@ -6,12 +7,13 @@ const COLUMNAS: { estado: EstadoPedido; titulo: string; colorDot: string }[] = [
     { estado: 'PENDIENTE', titulo: 'Pendientes', colorDot: 'bg-red-500' },
     { estado: 'CONFIRMADO', titulo: 'Confirmados', colorDot: 'bg-yellow-500' },
     { estado: 'EN_PREP', titulo: 'En Preparación', colorDot: 'bg-blue-500' },
-    { estado: 'EN_CAMINO', titulo: 'En Camino', colorDot: 'bg-indigo-500' },
     { estado: 'ENTREGADO', titulo: 'Entregados', colorDot: 'bg-green-500' },
     { estado: 'CANCELADO', titulo: 'Cancelados', colorDot: 'bg-red-800' },
 ];
 
 export function OrdersPage() {
+    useOrdersSocket();
+
     const { data, isLoading, isError, cambiarEstadoPedido, isChangingState } = useOrders();
     const pedidos = data?.data ?? [];
 

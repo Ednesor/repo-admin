@@ -170,7 +170,7 @@ export default function TableProducts({
     );
 
     const table = useReactTable({
-        data: data?.data ?? [],
+        data: data?.items ?? [],
         columns,
         state: {
             sorting,

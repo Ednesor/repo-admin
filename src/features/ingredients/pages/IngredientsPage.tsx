@@ -64,13 +64,12 @@ export default function IngredientsPage() {
         pageSize: PAGE_SIZE,
     });
 
-    const { data: dataAll } = useIngredients({
-        page: 0,
-        pageSize: 1000,
+    const { allData: dataAll } = useIngredients({
+        fetchAll: true,
     });
 
-    const totalAllergenic = dataAll?.data.filter((i) => i.es_alergeno).length ?? 0;
-    const totalNonAllergenic = dataAll?.data.filter((i) => !i.es_alergeno).length ?? 0;
+    const totalAllergenic = dataAll?.items?.filter((i) => i.es_alergeno).length ?? 0;
+    const totalNonAllergenic = dataAll?.items?.filter((i) => !i.es_alergeno).length ?? 0;
 
     const cardsItems = [
         {
@@ -93,7 +92,7 @@ export default function IngredientsPage() {
         },
         {
             Icon: GoStack,
-            title: String(data?.data.length ?? 0),
+            title: String(data?.items?.length ?? 0),
             description: "En esta página",
             iconColor: "bg-gray-200",
         },

@@ -9,11 +9,11 @@ export async function getUsers(
 ): Promise<GetUsersResponse> {
     const params = new URLSearchParams();
 
-    if (filters.offset !== undefined) {
-        params.append("offset", String(filters.offset));
+    if (filters.page !== undefined) {
+        params.append("page", String(filters.page));
     }
-    if (filters.limit !== undefined) {
-        params.append("limit", String(filters.limit));
+    if (filters.size !== undefined) {
+        params.append("size", String(filters.size));
     }
     if (filters.rol_codigo) {
         params.append("rol_codigo", filters.rol_codigo);
